@@ -1,0 +1,228 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            Int
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       Int
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+// Votre modèle User adapté
+model User {
+  id              Int       @id @default(autoincrement())
+  email           String    @unique
+  username        String    @unique
+  password        String? // Optionnel pour OAuth
+  profile_picture String?
+  emailVerified   DateTime? // Requis pour NextAuth
+  image           String? // Requis pour NextAuth
+  created_at      DateTime  @default(now())
+
+  // Relations NextAuth
+  accounts Account[]
+  sessions Session[]
+
+  // Relations existantes
+  sentMessages     Message[]      @relation("SenderMessages")
+  receivedMessages Message[]      @relation("RecipientMessages")
+  notifications    Notification[]
+  role             Role
+  client           Client?
+  seller           Seller?
+}
+
+// Reste de vos modèles inchangés...
+model Client {
+  id        Int    @id @default(autoincrement())
+  firstname String
+  lastname  String
+
+  //Relations
+  userId   Int       @unique
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  projects Project[]
+  orders   Order[]
+}
+
+model Seller {
+  id            Int    @id @default(autoincrement())
+  business_name String
+
+  //Relations
+  products  Product[]
+  adverts   Advert[]
+  orders    Order[]
+  proposals Proposal[]
+  userId    Int        @unique
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  projects  Project[]  @relation("SellerProject")
+}
+
+model Product {
+  id          Int      @id @default(autoincrement())
+  name        String
+  description String   @db.Text
+  price       Decimal  @db.Decimal(10, 2)
+  stock       Int
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+
+  //Relations
+  images     Image[]
+  categories Category[]
+  orders     Order[]
+  sellerId   Int
+  seller     Seller     @relation(fields: [sellerId], references: [id])
+}
+
+model Image {
+  id  Int    @id @default(autoincrement())
+  url String
+
+  //Relations
+  productId Int
+  product   Product @relation(fields: [productId], references: [id])
+}
+
+model Category {
+  id   Int    @id @default(autoincrement())
+  name String
+
+  //Relations
+  products Product[]
+}
+
+model Project {
+  id          Int      @id @default(autoincrement())
+  title       String
+  description String   @db.Text
+  deadline    DateTime
+  status      String   @default("pending") //Status: pending, accepted, in_progress, completed
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+
+  //Relations
+  proposals Proposal[]
+  order     Order?
+  clientId  Int
+  client    Client     @relation(fields: [clientId], references: [id])
+  sellerId  Int?
+  seller    Seller?    @relation("SellerProject", fields: [sellerId], references: [id])
+  advert    Advert?    @relation("ProjectAdvert")
+}
+
+model Proposal {
+  id         Int       @id @default(autoincrement())
+  price      Decimal   @db.Decimal(10, 2)
+  message    String
+  status     String    @default("pending") //Status : pending, accepted, rejected
+  created_at DateTime  @default(now())
+  updated_at DateTime? @updatedAt
+
+  //Relations
+  projectId Int
+  project   Project @relation(fields: [projectId], references: [id])
+  sellerId  Int
+  seller    Seller  @relation(fields: [sellerId], references: [id])
+  advertId  Int
+  advert    Advert  @relation(fields: [advertId], references: [id])
+}
+
+model Advert {
+  id          Int      @id @default(autoincrement())
+  price       Decimal  @db.Decimal(10, 2)
+  title       String
+  description String
+  status      String   @default("active") // Status : active, closed
+  created_at  DateTime @default(now())
+
+  //Relations
+  proposals Proposal[]
+  sellerId  Int
+  seller    Seller     @relation(fields: [sellerId], references: [id])
+  projectId Int?       @unique
+  project   Project?   @relation("ProjectAdvert", fields: [projectId], references: [id])
+}
+
+model Order {
+  id            Int      @id @default(autoincrement())
+  quantity      Int
+  totalPrice    Decimal  @db.Decimal(10, 2)
+  status        String   @default("pending") // Status : pending, shipped, delivered, cancelled
+  paymentStatus String   @default("unpaid") // Payment status : unpaid, paid, refunded
+  created_at    DateTime @default(now())
+  updated_at    DateTime @updatedAt
+
+  //Relations
+  productId Int
+  product   Product  @relation(fields: [productId], references: [id])
+  projectId Int?     @unique
+  project   Project? @relation(fields: [projectId], references: [id])
+  sellerId  Int
+  seller    Seller   @relation(fields: [sellerId], references: [id])
+  clientId  Int
+  client    Client   @relation(fields: [clientId], references: [id])
+}
+
+model Message {
+  id         Int      @id @default(autoincrement())
+  content    String   @db.Text
+  created_at DateTime @default(now())
+
+  // Relations
+  senderId    Int
+  sender      User @relation("SenderMessages", fields: [senderId], references: [id], onDelete: Cascade)
+  recipientId Int
+  recipient   User @relation("RecipientMessages", fields: [recipientId], references: [id], onDelete: Cascade)
+}
+
+model Notification {
+  id         Int      @id @default(autoincrement())
+  content    String   @db.Text
+  readStatus Boolean  @default(false)
+  created_at DateTime @default(now())
+
+  // Relations
+  userId Int
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+enum Role {
+  CLIENT
+  SELLER
+}
