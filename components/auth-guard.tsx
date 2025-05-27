@@ -8,19 +8,20 @@ import { Loader2 } from "lucide-react"
 
 interface AuthGuardProps {
   children: React.ReactNode
-  userType?: "CLIENT" | "SELLER" | null
+  requiredRole?: "CLIENT" | "SELLER"
   requireAuth?: boolean
+  fallback?: React.ReactNode
 }
 
-export default function AuthGuard({ children, userType, requireAuth = false }: AuthGuardProps) {
+export default function AuthGuard({ children, requiredRole, requireAuth = false, fallback }: AuthGuardProps) {
   const { data: session, status } = useSession()
   const router = useRouter()
   const pathname = usePathname()
 
   useEffect(() => {
     // Public routes that don't require authentication
-    const publicRoutes = ["/", "/auth/login", "/auth/register"]
-    const isPublicRoute = publicRoutes.includes(pathname) || pathname === "/"
+    const publicRoutes = ["/", "/auth/login", "/auth/register", "/unauthorized"]
+    const isPublicRoute = publicRoutes.includes(pathname)
 
     // If loading, do nothing
     if (status === "loading") return
@@ -37,29 +38,36 @@ export default function AuthGuard({ children, userType, requireAuth = false }: A
       return
     }
 
-    // If authenticated but wrong user type, redirect to appropriate dashboard
-    if (session && userType && session.user.role !== userType) {
+    // If authenticated but wrong user type, redirect appropriately
+    if (session && requiredRole && session.user.role !== requiredRole) {
       if (session.user.role === "CLIENT") {
         router.push("/client/account")
       } else if (session.user.role === "SELLER") {
         router.push("/seller/dashboard")
+      } else {
+        router.push("/unauthorized")
       }
       return
     }
-  }, [session, status, pathname, router, userType, requireAuth])
+  }, [session, status, pathname, router, requiredRole, requireAuth])
 
   // Show loading while checking authentication
   if (status === "loading") {
     return (
-        <div className="flex items-center justify-center min-h-[200px]">
-          <Loader2 className="h-8 w-8 animate-spin" />
-        </div>
+        fallback || (
+            <div className="flex items-center justify-center min-h-[400px]">
+              <div className="text-center">
+                <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-teal-600" />
+                <p className="text-gray-600">Chargement...</p>
+              </div>
+            </div>
+        )
     )
   }
 
   // Public routes that don't require authentication
-  const publicRoutes = ["/", "/auth/login", "/auth/register"]
-  const isPublicRoute = publicRoutes.includes(pathname) || pathname === "/"
+  const publicRoutes = ["/", "/auth/login", "/auth/register", "/unauthorized"]
+  const isPublicRoute = publicRoutes.includes(pathname)
 
   // If authentication is required but user is not authenticated
   if (requireAuth && status === "unauthenticated") {
@@ -72,12 +80,18 @@ export default function AuthGuard({ children, userType, requireAuth = false }: A
   }
 
   // If authenticated but wrong user type
-  if (session && userType && session.user.role !== userType) {
+  if (session && requiredRole && session.user.role !== requiredRole) {
     return (
-        <div className="flex items-center justify-center min-h-[200px]">
+        <div className="flex items-center justify-center min-h-[400px]">
           <div className="text-center">
-            <h2 className="text-2xl font-bold text-gray-900">Accès non autorisé</h2>
-            <p className="text-gray-600">Vous n'avez pas les permissions pour accéder à cette page.</p>
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">Accès non autorisé</h2>
+            <p className="text-gray-600 mb-4">Vous n'avez pas les permissions pour accéder à cette page.</p>
+            <button
+                onClick={() => router.back()}
+                className="bg-teal-600 text-white px-4 py-2 rounded-md hover:bg-teal-700 transition-colors"
+            >
+              Retour
+            </button>
           </div>
         </div>
     )

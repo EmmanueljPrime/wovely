@@ -1,28 +1,11 @@
 "use client"
 
-import { useSession } from "next-auth/react"
-import { useRouter } from "next/navigation"
-import { useEffect } from "react"
+import { useRequireRole } from "@/hooks/use-auth"
 
 export default function SellerDashboard() {
-  const { data: session, status } = useSession()
-  const router = useRouter()
+  const { user, isLoading, hasCorrectRole } = useRequireRole("SELLER")
 
-  useEffect(() => {
-    if (status === "loading") return
-
-    if (!session) {
-      router.push("/auth/login")
-      return
-    }
-
-    if (session.user.role !== "SELLER") {
-      router.push("/")
-      return
-    }
-  }, [session, status, router])
-
-  if (status === "loading") {
+  if (isLoading) {
     return (
         <div className="flex items-center justify-center min-h-screen">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-teal-600"></div>
@@ -30,24 +13,21 @@ export default function SellerDashboard() {
     )
   }
 
-  if (!session || session.user.role !== "SELLER") {
-    return (
-        <div className="flex items-center justify-center min-h-screen">
-          <div className="text-center">
-            <h2 className="text-2xl font-bold text-gray-900">Accès non autorisé</h2>
-            <p className="text-gray-600">Vous n'avez pas les permissions pour accéder à cette page.</p>
-          </div>
-        </div>
-    )
+  if (!hasCorrectRole) {
+    return null
   }
 
   return (
       <div className="p-6">
+        {/* Header de la page */}
         <div className="mb-6">
           <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
-          <p className="text-gray-600">Bienvenue sur votre tableau de bord</p>
+          <p className="text-gray-600">
+            Bienvenue {user?.name} - {user?.seller?.business_name}
+          </p>
         </div>
 
+        {/* Stats cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           <div className="bg-white rounded-lg shadow p-6">
             <div className="flex items-center">
@@ -126,6 +106,7 @@ export default function SellerDashboard() {
           </div>
         </div>
 
+        {/* Content sections */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <div className="bg-white rounded-lg shadow">
             <div className="p-6 border-b border-gray-200">

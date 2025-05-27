@@ -20,6 +20,8 @@ export function useAuth(requireAuth = false) {
         isAuthenticated: status === "authenticated",
         isClient: session?.user?.role === "CLIENT",
         isSeller: session?.user?.role === "SELLER",
+        session,
+        status,
     }
 }
 
@@ -33,9 +35,15 @@ export function useRequireRole(role: "CLIENT" | "SELLER") {
 
     useEffect(() => {
         if (!isLoading && isAuthenticated && user?.role !== role) {
-            router.push("/unauthorized")
+            if (user?.role === "CLIENT") {
+                router.push("/client/account")
+            } else if (user?.role === "SELLER") {
+                router.push("/seller/dashboard")
+            } else {
+                router.push("/unauthorized")
+            }
         }
     }, [isLoading, isAuthenticated, user?.role, role, router])
 
-    return { user, isLoading, isAuthenticated }
+    return { user, isLoading, isAuthenticated, hasCorrectRole: user?.role === role }
 }

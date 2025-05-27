@@ -1,29 +1,13 @@
 "use client"
 
-import { useSession } from "next-auth/react"
-import { useRouter } from "next/navigation"
-import { useEffect, useState } from "react"
+import { useRequireRole } from "@/hooks/use-auth"
+import { useState } from "react"
 
 export default function SellerProfile() {
-  const { data: session, status } = useSession()
-  const router = useRouter()
+  const { user, isLoading, hasCorrectRole } = useRequireRole("SELLER")
   const [isEditing, setIsEditing] = useState(false)
 
-  useEffect(() => {
-    if (status === "loading") return
-
-    if (!session) {
-      router.push("/auth/login")
-      return
-    }
-
-    if (session.user.role !== "SELLER") {
-      router.push("/")
-      return
-    }
-  }, [session, status, router])
-
-  if (status === "loading") {
+  if (isLoading) {
     return (
         <div className="flex items-center justify-center min-h-screen">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-teal-600"></div>
@@ -31,15 +15,8 @@ export default function SellerProfile() {
     )
   }
 
-  if (!session || session.user.role !== "SELLER") {
-    return (
-        <div className="flex items-center justify-center min-h-screen">
-          <div className="text-center">
-            <h2 className="text-2xl font-bold text-gray-900">Accès non autorisé</h2>
-            <p className="text-gray-600">Vous n'avez pas les permissions pour accéder à cette page.</p>
-          </div>
-        </div>
-    )
+  if (!hasCorrectRole) {
+    return null
   }
 
   return (
@@ -63,8 +40,8 @@ export default function SellerProfile() {
                   ></path>
                 </svg>
               </div>
-              <h3 className="text-lg font-medium text-gray-900">{session.user.name}</h3>
-              <p className="text-gray-600">{session.user.seller?.business_name}</p>
+              <h3 className="text-lg font-medium text-gray-900">{user?.name}</h3>
+              <p className="text-gray-600">{user?.seller?.business_name}</p>
               <button className="mt-4 bg-teal-600 text-white px-4 py-2 rounded-md text-sm hover:bg-teal-700 transition-colors">
                 Change Photo
               </button>
@@ -92,11 +69,11 @@ export default function SellerProfile() {
                   {isEditing ? (
                       <input
                           type="text"
-                          defaultValue={session.user.seller?.business_name}
+                          defaultValue={user?.seller?.business_name}
                           className="w-full border border-gray-300 rounded-md px-3 py-2"
                       />
                   ) : (
-                      <p className="text-gray-900">{session.user.seller?.business_name}</p>
+                      <p className="text-gray-900">{user?.seller?.business_name}</p>
                   )}
                 </div>
 
@@ -105,11 +82,11 @@ export default function SellerProfile() {
                   {isEditing ? (
                       <input
                           type="email"
-                          defaultValue={session.user.email}
+                          defaultValue={user?.email}
                           className="w-full border border-gray-300 rounded-md px-3 py-2"
                       />
                   ) : (
-                      <p className="text-gray-900">{session.user.email}</p>
+                      <p className="text-gray-900">{user?.email}</p>
                   )}
                 </div>
 

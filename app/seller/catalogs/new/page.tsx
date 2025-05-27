@@ -2,118 +2,124 @@
 
 import type React from "react"
 
+import { useRequireRole } from "@/hooks/use-auth"
 import { useState } from "react"
-import { useRouter } from "next/navigation"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
-import { Label } from "@/components/ui/label"
-import { Card, CardContent } from "@/components/ui/card"
 import Link from "next/link"
 
 export default function NewCatalog() {
-  const router = useRouter()
-  const [formData, setFormData] = useState({
+  const { user, isLoading, hasCorrectRole } = useRequireRole("SELLER")
+  const [catalogData, setCatalogData] = useState({
     name: "",
     description: "",
-    image: null as File | null,
+    category: "",
+    status: "draft",
   })
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null)
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target
-    setFormData((prev) => ({ ...prev, [name]: value }))
+  if (isLoading) {
+    return (
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-teal-600"></div>
+        </div>
+    )
   }
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      const file = e.target.files[0]
-      setFormData((prev) => ({ ...prev, image: file }))
-
-      // Create preview URL
-      const reader = new FileReader()
-      reader.onloadend = () => {
-        setPreviewUrl(reader.result as string)
-      }
-      reader.readAsDataURL(file)
-    }
+  if (!hasCorrectRole) {
+    return null
   }
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    console.log("Form submitted:", formData)
-    // Here you would typically send the data to your API
-
-    // Redirect to catalogs page after submission
-    router.push("/seller/catalogs")
+    // Handle catalog creation
+    console.log("Creating catalog:", catalogData)
   }
 
   return (
-    <div className="p-6">
-      <div className="mb-6">
-        <Link href="/seller/catalogs" className="text-sm text-teal-600 hover:underline mb-2 inline-block">
-          ← Back to Catalogs
-        </Link>
-        <h1 className="text-xl font-semibold">Create New Catalog</h1>
-      </div>
+      <div className="p-6">
+        <div className="mb-6">
+          <div className="flex items-center space-x-2 text-sm text-gray-600 mb-2">
+            <Link href="/seller/catalogs" className="hover:text-teal-600">
+              Catalogs
+            </Link>
+            <span>/</span>
+            <span>New Catalog</span>
+          </div>
+          <h1 className="text-2xl font-bold text-gray-900">Create New Catalog</h1>
+          <p className="text-gray-600">Add a new catalog to showcase your products</p>
+        </div>
 
-      <Card>
-        <CardContent className="p-6">
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="space-y-2">
-              <Label htmlFor="name">Catalog Name</Label>
-              <Input
-                id="name"
-                name="name"
-                value={formData.name}
-                onChange={handleChange}
-                placeholder="Enter catalog name"
-                required
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="description">Description</Label>
-              <Textarea
-                id="description"
-                name="description"
-                value={formData.description}
-                onChange={handleChange}
-                placeholder="Enter catalog description"
-                rows={4}
-                required
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="image">Catalog Image</Label>
-              <div className="flex items-center gap-4">
-                <Input
-                  id="image"
-                  name="image"
-                  type="file"
-                  accept="image/*"
-                  onChange={handleImageChange}
-                  className="max-w-sm"
+        <div className="bg-white rounded-lg shadow">
+          <form onSubmit={handleSubmit} className="p-6">
+            <div className="space-y-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Catalog Name</label>
+                <input
+                    type="text"
+                    required
+                    value={catalogData.name}
+                    onChange={(e) => setCatalogData({ ...catalogData, name: e.target.value })}
+                    className="w-full border border-gray-300 rounded-md px-3 py-2"
+                    placeholder="Enter catalog name"
                 />
-                {previewUrl && (
-                  <div className="w-24 h-24 relative border rounded-md overflow-hidden">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={previewUrl || "/placeholder.svg"} alt="Preview" className="w-full h-full object-cover" />
-                  </div>
-                )}
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Description</label>
+                <textarea
+                    rows={4}
+                    value={catalogData.description}
+                    onChange={(e) => setCatalogData({ ...catalogData, description: e.target.value })}
+                    className="w-full border border-gray-300 rounded-md px-3 py-2"
+                    placeholder="Describe your catalog"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Category</label>
+                <select
+                    value={catalogData.category}
+                    onChange={(e) => setCatalogData({ ...catalogData, category: e.target.value })}
+                    className="w-full border border-gray-300 rounded-md px-3 py-2"
+                >
+                  <option value="">Select a category</option>
+                  <option value="suits">Suits</option>
+                  <option value="dresses">Dresses</option>
+                  <option value="shirts">Shirts</option>
+                  <option value="pants">Pants</option>
+                  <option value="accessories">Accessories</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Status</label>
+                <select
+                    value={catalogData.status}
+                    onChange={(e) => setCatalogData({ ...catalogData, status: e.target.value })}
+                    className="w-full border border-gray-300 rounded-md px-3 py-2"
+                >
+                  <option value="draft">Draft</option>
+                  <option value="published">Published</option>
+                </select>
               </div>
             </div>
 
-            <div className="flex justify-end gap-3">
-              <Button type="button" variant="outline" onClick={() => router.push("/seller/catalogs")}>
-                Cancel
-              </Button>
-              <Button type="submit">Create Catalog</Button>
+            <div className="mt-8 flex justify-end space-x-3">
+              <Link href="/seller/catalogs">
+                <button
+                    type="button"
+                    className="bg-gray-300 text-gray-700 px-4 py-2 rounded-md text-sm hover:bg-gray-400 transition-colors"
+                >
+                  Cancel
+                </button>
+              </Link>
+              <button
+                  type="submit"
+                  className="bg-teal-600 text-white px-4 py-2 rounded-md text-sm hover:bg-teal-700 transition-colors"
+              >
+                Create Catalog
+              </button>
             </div>
           </form>
-        </CardContent>
-      </Card>
-    </div>
+        </div>
+      </div>
   )
 }

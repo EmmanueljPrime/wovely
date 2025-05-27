@@ -14,12 +14,26 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Settings, LogOut } from "lucide-react"
+import { usePathname } from "next/navigation"
 
 export default function Header() {
   const [searchQuery, setSearchQuery] = useState("")
   const { data: session, status } = useSession()
+  const pathname = usePathname()
+
+  const isProductPage = () => {
+    return (
+        pathname === "/" ||
+        pathname.startsWith("/products") ||
+        pathname.startsWith("/clothing") ||
+        pathname.startsWith("/material") ||
+        pathname.startsWith("/price") ||
+        pathname.startsWith("/size") ||
+        pathname.startsWith("/color")
+    )
+  }
 
   const handleSignOut = () => {
     signOut({ callbackUrl: "/" })
@@ -124,6 +138,7 @@ export default function Header() {
                     <DropdownMenuTrigger asChild>
                       <Button variant="ghost" className="relative h-8 w-8 rounded-full">
                         <Avatar className="h-8 w-8">
+                          <AvatarImage src={session.user.image || ""} alt={session.user.name || ""} />
                           <AvatarFallback>{getUserInitials()}</AvatarFallback>
                         </Avatar>
                       </Button>
@@ -146,7 +161,10 @@ export default function Header() {
                         </Link>
                       </DropdownMenuItem>
                       <DropdownMenuItem asChild>
-                        <Link href="/settings" className="flex items-center">
+                        <Link
+                            href={session?.user?.role === "CLIENT" ? "/client/settings" : "/seller/settings"}
+                            className="flex items-center"
+                        >
                           <Settings className="mr-2 h-4 w-4" />
                           <span>Paramètres</span>
                         </Link>
@@ -172,155 +190,157 @@ export default function Header() {
           </div>
         </div>
 
-        <div className="container mx-auto px-4 py-2 flex items-center justify-between">
-          <div className="flex space-x-4">
-            <div className="relative group">
-              <Button variant="ghost" className="flex items-center gap-1">
-                Clothing <span className="text-xs">▼</span>
-              </Button>
-              <div className="absolute hidden group-hover:block z-10 bg-white shadow-lg rounded-md p-2 min-w-40">
-                <Link
-                    href={session?.user?.role === "CLIENT" ? "/client/clothing/shirts" : "/clothing/shirts"}
-                    className="block px-4 py-2 hover:bg-gray-100 rounded-md"
-                >
-                  Shirts
-                </Link>
-                <Link
-                    href={session?.user?.role === "CLIENT" ? "/client/clothing/pants" : "/clothing/pants"}
-                    className="block px-4 py-2 hover:bg-gray-100 rounded-md"
-                >
-                  Pants
-                </Link>
-                <Link
-                    href={session?.user?.role === "CLIENT" ? "/client/clothing/jackets" : "/clothing/jackets"}
-                    className="block px-4 py-2 hover:bg-gray-100 rounded-md"
-                >
-                  Jackets
-                </Link>
+        {isProductPage() && (
+            <div className="container mx-auto px-4 py-2 flex items-center justify-between">
+              <div className="flex space-x-4">
+                <div className="relative group">
+                  <Button variant="ghost" className="flex items-center gap-1">
+                    Clothing <span className="text-xs">▼</span>
+                  </Button>
+                  <div className="absolute hidden group-hover:block z-10 bg-white shadow-lg rounded-md p-2 min-w-40">
+                    <Link
+                        href={session?.user?.role === "CLIENT" ? "/client/clothing/shirts" : "/clothing/shirts"}
+                        className="block px-4 py-2 hover:bg-gray-100 rounded-md"
+                    >
+                      Shirts
+                    </Link>
+                    <Link
+                        href={session?.user?.role === "CLIENT" ? "/client/clothing/pants" : "/clothing/pants"}
+                        className="block px-4 py-2 hover:bg-gray-100 rounded-md"
+                    >
+                      Pants
+                    </Link>
+                    <Link
+                        href={session?.user?.role === "CLIENT" ? "/client/clothing/jackets" : "/clothing/jackets"}
+                        className="block px-4 py-2 hover:bg-gray-100 rounded-md"
+                    >
+                      Jackets
+                    </Link>
+                  </div>
+                </div>
+                <div className="relative group">
+                  <Button variant="ghost" className="flex items-center gap-1">
+                    Material <span className="text-xs">▼</span>
+                  </Button>
+                  <div className="absolute hidden group-hover:block z-10 bg-white shadow-lg rounded-md p-2 min-w-40">
+                    <Link
+                        href={session?.user?.role === "CLIENT" ? "/client/material/cotton" : "/material/cotton"}
+                        className="block px-4 py-2 hover:bg-gray-100 rounded-md"
+                    >
+                      Cotton
+                    </Link>
+                    <Link
+                        href={session?.user?.role === "CLIENT" ? "/client/wool" : "/material/wool"}
+                        className="block px-4 py-2 hover:bg-gray-100 rounded-md"
+                    >
+                      Wool
+                    </Link>
+                    <Link
+                        href={session?.user?.role === "CLIENT" ? "/client/silk" : "/material/silk"}
+                        className="block px-4 py-2 hover:bg-gray-100 rounded-md"
+                    >
+                      Silk
+                    </Link>
+                  </div>
+                </div>
+                <div className="relative group">
+                  <Button variant="ghost" className="flex items-center gap-1">
+                    Price <span className="text-xs">▼</span>
+                  </Button>
+                  <div className="absolute hidden group-hover:block z-10 bg-white shadow-lg rounded-md p-2 min-w-40">
+                    <Link
+                        href={session?.user?.role === "CLIENT" ? "/client/price/low" : "/price/low"}
+                        className="block px-4 py-2 hover:bg-gray-100 rounded-md"
+                    >
+                      $0 - $50
+                    </Link>
+                    <Link
+                        href={session?.user?.role === "CLIENT" ? "/client/price/medium" : "/price/medium"}
+                        className="block px-4 py-2 hover:bg-gray-100 rounded-md"
+                    >
+                      $50 - $100
+                    </Link>
+                    <Link
+                        href={session?.user?.role === "CLIENT" ? "/client/price/high" : "/price/high"}
+                        className="block px-4 py-2 hover:bg-gray-100 rounded-md"
+                    >
+                      $100+
+                    </Link>
+                  </div>
+                </div>
+                <div className="relative group">
+                  <Button variant="ghost" className="flex items-center gap-1">
+                    Size <span className="text-xs">▼</span>
+                  </Button>
+                  <div className="absolute hidden group-hover:block z-10 bg-white shadow-lg rounded-md p-2 min-w-40">
+                    <Link
+                        href={session?.user?.role === "CLIENT" ? "/client/size/s" : "/size/s"}
+                        className="block px-4 py-2 hover:bg-gray-100 rounded-md"
+                    >
+                      S
+                    </Link>
+                    <Link
+                        href={session?.user?.role === "CLIENT" ? "/client/size/m" : "/size/m"}
+                        className="block px-4 py-2 hover:bg-gray-100 rounded-md"
+                    >
+                      M
+                    </Link>
+                    <Link
+                        href={session?.user?.role === "CLIENT" ? "/client/size/l" : "/size/l"}
+                        className="block px-4 py-2 hover:bg-gray-100 rounded-md"
+                    >
+                      L
+                    </Link>
+                    <Link
+                        href={session?.user?.role === "CLIENT" ? "/client/size/xl" : "/size/xl"}
+                        className="block px-4 py-2 hover:bg-gray-100 rounded-md"
+                    >
+                      XL
+                    </Link>
+                  </div>
+                </div>
+                <div className="relative group">
+                  <Button variant="ghost" className="flex items-center gap-1">
+                    Color <span className="text-xs">▼</span>
+                  </Button>
+                  <div className="absolute hidden group-hover:block z-10 bg-white shadow-lg rounded-md p-2 min-w-40">
+                    <Link
+                        href={session?.user?.role === "CLIENT" ? "/client/color/black" : "/color/black"}
+                        className="block px-4 py-2 hover:bg-gray-100 rounded-md"
+                    >
+                      Black
+                    </Link>
+                    <Link
+                        href={session?.user?.role === "CLIENT" ? "/client/color/white" : "/color/white"}
+                        className="block px-4 py-2 hover:bg-gray-100 rounded-md"
+                    >
+                      White
+                    </Link>
+                    <Link
+                        href={session?.user?.role === "CLIENT" ? "/client/color/blue" : "/color/blue"}
+                        className="block px-4 py-2 hover:bg-gray-100 rounded-md"
+                    >
+                      Blue
+                    </Link>
+                    <Link
+                        href={session?.user?.role === "CLIENT" ? "/client/color/red" : "/color/red"}
+                        className="block px-4 py-2 hover:bg-gray-100 rounded-md"
+                    >
+                      Red
+                    </Link>
+                  </div>
+                </div>
+              </div>
+              <div className="flex space-x-2">
+                <Button className="rounded-full bg-white text-black border border-gray-300 hover:bg-gray-100">
+                  Search Product
+                </Button>
+                <Button className="rounded-full bg-white text-black border border-gray-300 hover:bg-gray-100">
+                  Search Tailor
+                </Button>
               </div>
             </div>
-            <div className="relative group">
-              <Button variant="ghost" className="flex items-center gap-1">
-                Material <span className="text-xs">▼</span>
-              </Button>
-              <div className="absolute hidden group-hover:block z-10 bg-white shadow-lg rounded-md p-2 min-w-40">
-                <Link
-                    href={session?.user?.role === "CLIENT" ? "/client/material/cotton" : "/material/cotton"}
-                    className="block px-4 py-2 hover:bg-gray-100 rounded-md"
-                >
-                  Cotton
-                </Link>
-                <Link
-                    href={session?.user?.role === "CLIENT" ? "/client/wool" : "/material/wool"}
-                    className="block px-4 py-2 hover:bg-gray-100 rounded-md"
-                >
-                  Wool
-                </Link>
-                <Link
-                    href={session?.user?.role === "CLIENT" ? "/client/silk" : "/material/silk"}
-                    className="block px-4 py-2 hover:bg-gray-100 rounded-md"
-                >
-                  Silk
-                </Link>
-              </div>
-            </div>
-            <div className="relative group">
-              <Button variant="ghost" className="flex items-center gap-1">
-                Price <span className="text-xs">▼</span>
-              </Button>
-              <div className="absolute hidden group-hover:block z-10 bg-white shadow-lg rounded-md p-2 min-w-40">
-                <Link
-                    href={session?.user?.role === "CLIENT" ? "/client/price/low" : "/price/low"}
-                    className="block px-4 py-2 hover:bg-gray-100 rounded-md"
-                >
-                  $0 - $50
-                </Link>
-                <Link
-                    href={session?.user?.role === "CLIENT" ? "/client/price/medium" : "/price/medium"}
-                    className="block px-4 py-2 hover:bg-gray-100 rounded-md"
-                >
-                  $50 - $100
-                </Link>
-                <Link
-                    href={session?.user?.role === "CLIENT" ? "/client/price/high" : "/price/high"}
-                    className="block px-4 py-2 hover:bg-gray-100 rounded-md"
-                >
-                  $100+
-                </Link>
-              </div>
-            </div>
-            <div className="relative group">
-              <Button variant="ghost" className="flex items-center gap-1">
-                Size <span className="text-xs">▼</span>
-              </Button>
-              <div className="absolute hidden group-hover:block z-10 bg-white shadow-lg rounded-md p-2 min-w-40">
-                <Link
-                    href={session?.user?.role === "CLIENT" ? "/client/size/s" : "/size/s"}
-                    className="block px-4 py-2 hover:bg-gray-100 rounded-md"
-                >
-                  S
-                </Link>
-                <Link
-                    href={session?.user?.role === "CLIENT" ? "/client/size/m" : "/size/m"}
-                    className="block px-4 py-2 hover:bg-gray-100 rounded-md"
-                >
-                  M
-                </Link>
-                <Link
-                    href={session?.user?.role === "CLIENT" ? "/client/size/l" : "/size/l"}
-                    className="block px-4 py-2 hover:bg-gray-100 rounded-md"
-                >
-                  L
-                </Link>
-                <Link
-                    href={session?.user?.role === "CLIENT" ? "/client/size/xl" : "/size/xl"}
-                    className="block px-4 py-2 hover:bg-gray-100 rounded-md"
-                >
-                  XL
-                </Link>
-              </div>
-            </div>
-            <div className="relative group">
-              <Button variant="ghost" className="flex items-center gap-1">
-                Color <span className="text-xs">▼</span>
-              </Button>
-              <div className="absolute hidden group-hover:block z-10 bg-white shadow-lg rounded-md p-2 min-w-40">
-                <Link
-                    href={session?.user?.role === "CLIENT" ? "/client/color/black" : "/color/black"}
-                    className="block px-4 py-2 hover:bg-gray-100 rounded-md"
-                >
-                  Black
-                </Link>
-                <Link
-                    href={session?.user?.role === "CLIENT" ? "/client/color/white" : "/color/white"}
-                    className="block px-4 py-2 hover:bg-gray-100 rounded-md"
-                >
-                  White
-                </Link>
-                <Link
-                    href={session?.user?.role === "CLIENT" ? "/client/color/blue" : "/color/blue"}
-                    className="block px-4 py-2 hover:bg-gray-100 rounded-md"
-                >
-                  Blue
-                </Link>
-                <Link
-                    href={session?.user?.role === "CLIENT" ? "/client/color/red" : "/color/red"}
-                    className="block px-4 py-2 hover:bg-gray-100 rounded-md"
-                >
-                  Red
-                </Link>
-              </div>
-            </div>
-          </div>
-          <div className="flex space-x-2">
-            <Button className="rounded-full bg-white text-black border border-gray-300 hover:bg-gray-100">
-              Search Product
-            </Button>
-            <Button className="rounded-full bg-white text-black border border-gray-300 hover:bg-gray-100">
-              Search Tailor
-            </Button>
-          </div>
-        </div>
+        )}
       </header>
   )
 }

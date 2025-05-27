@@ -1,97 +1,72 @@
 "use client"
 
+import { useRequireRole } from "@/hooks/use-auth"
 import Link from "next/link"
-import Image from "next/image"
-import { Button } from "@/components/ui/button"
-import { useState } from "react"
-import { Plus } from "lucide-react"
 
 export default function SellerCatalogs() {
-  // Sample catalogs data
-  const [catalogs, setCatalogs] = useState([
-    {
-      id: 1,
-      name: "Catalog 1",
-      description: "Description XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
-      totalArticles: "XXX",
-      image: "/placeholder.svg?height=150&width=150",
-    },
-    {
-      id: 2,
-      name: "Catalog 2",
-      description: "Description XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
-      totalArticles: "XXX",
-      image: "/placeholder.svg?height=150&width=150",
-    },
-    {
-      id: 3,
-      name: "Catalog 3",
-      description: "Description XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
-      totalArticles: "XXX",
-      image: "/placeholder.svg?height=150&width=150",
-    },
-    {
-      id: 4,
-      name: "Catalog 4",
-      description: "Description XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
-      totalArticles: "XXX",
-      image: "/placeholder.svg?height=150&width=150",
-    },
-  ])
+  const { user, isLoading, hasCorrectRole } = useRequireRole("SELLER")
+
+  if (isLoading) {
+    return (
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-teal-600"></div>
+        </div>
+    )
+  }
+
+  if (!hasCorrectRole) {
+    return null
+  }
 
   return (
-    <div className="p-6">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-xl font-semibold">Your Catalogs</h1>
-        <Link href="/seller/catalogs/new">
-          <Button>
-            <Plus className="h-4 w-4 mr-2" />
-            Add Catalog
-          </Button>
-        </Link>
-      </div>
+      <div className="p-6">
+        <div className="mb-6">
+          <h1 className="text-2xl font-bold text-gray-900">Catalogs</h1>
+          <p className="text-gray-600">Manage your product catalogs and collections</p>
+        </div>
 
-      {catalogs.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-12 text-center">
-          <h2 className="text-xl font-semibold mb-2">Your Catalog list is empty</h2>
-          <p className="text-gray-500 max-w-md mb-6">
-            Fill the catalog with products by adding your identifiers. You can always disable specific products, if
-            you'd like.
-          </p>
+        <div className="mb-6 flex justify-between items-center">
+          <div className="flex space-x-2">
+            <select className="border border-gray-300 rounded-md px-3 py-2 text-sm">
+              <option>All Catalogs</option>
+              <option>Published</option>
+              <option>Draft</option>
+              <option>Archived</option>
+            </select>
+            <input
+                type="search"
+                placeholder="Search catalogs..."
+                className="border border-gray-300 rounded-md px-3 py-2 text-sm"
+            />
+          </div>
           <Link href="/seller/catalogs/new">
-            <Button>
-              <Plus className="h-4 w-4 mr-2" />
-              Add Catalog
-            </Button>
+            <button className="bg-teal-600 text-white px-4 py-2 rounded-md text-sm hover:bg-teal-700 transition-colors">
+              New Catalog
+            </button>
           </Link>
         </div>
-      ) : (
-        <div className="space-y-6">
-          {catalogs.map((catalog) => (
-            <div key={catalog.id} className="flex gap-6 border-b pb-6">
-              <div className="flex-shrink-0">
-                <Image
-                  src={catalog.image || "/placeholder.svg"}
-                  alt={catalog.name}
-                  width={150}
-                  height={150}
-                  className="rounded-lg object-cover"
-                />
-              </div>
-              <div className="flex-grow">
-                <Link href={`/seller/catalogs/${catalog.id}`}>
-                  <h3 className="text-lg font-semibold hover:underline">{catalog.name}</h3>
-                </Link>
-                <p className="text-gray-600 text-sm mt-2">{catalog.description}</p>
-              </div>
-              <div className="flex-shrink-0 self-center text-right">
-                <p className="text-sm text-gray-500">Total Article :</p>
-                <p className="font-medium">{catalog.totalArticles}</p>
-              </div>
+
+        <div className="bg-white rounded-lg shadow">
+          <div className="p-6">
+            <div className="text-center py-12">
+              <svg className="w-12 h-12 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
+                ></path>
+              </svg>
+              <p className="text-lg font-medium text-gray-900 mb-2">No catalogs yet</p>
+              <p className="text-gray-500 mb-4">Create your first catalog to showcase your products.</p>
+              <Link href="/seller/catalogs/new">
+                <button className="bg-teal-600 text-white px-4 py-2 rounded-md text-sm hover:bg-teal-700 transition-colors">
+                  Create Catalog
+                </button>
+              </Link>
             </div>
-          ))}
+          </div>
         </div>
-      )}
-    </div>
+      </div>
   )
 }
