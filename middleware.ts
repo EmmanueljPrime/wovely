@@ -2,49 +2,42 @@ import { withAuth } from "next-auth/middleware"
 
 export default withAuth(
     function middleware(req) {
-        // Middleware personnalisé si nécessaire
+        // Middleware logic here if needed
+        console.log("Middleware - Token:", req.nextauth.token)
+        console.log("Middleware - Pathname:", req.nextUrl.pathname)
     },
     {
         callbacks: {
             authorized: ({ token, req }) => {
                 const { pathname } = req.nextUrl
 
-                // Pages publiques - toujours autoriser
-                if (
-                    pathname.startsWith('/auth/') ||
-                    pathname === '/' ||
-                    pathname.startsWith('/api/auth/') ||
-                    pathname.startsWith('/_next/') ||
-                    pathname.startsWith('/favicon')
-                ) {
+                // Public routes - toujours autorisées
+                if (pathname === "/" || pathname.startsWith("/auth/") || pathname.startsWith("/api/auth/")) {
                     return true
                 }
 
-                // Pages protégées - vérifier l'authentification
-                if (pathname.startsWith('/client/')) {
-                    return !!token && token.role === 'CLIENT'
+                // Si pas de token, pas d'accès aux routes protégées
+                if (!token) {
+                    return false
                 }
 
-                if (pathname.startsWith('/seller/')) {
-                    return !!token && token.role === 'SELLER'
+                // Routes CLIENT - seulement pour les clients
+                if (pathname.startsWith("/client/")) {
+                    return token.role === "CLIENT"
                 }
 
-                // Pour toutes les autres pages protégées
-                return !!token
+                // Routes SELLER - seulement pour les sellers
+                if (pathname.startsWith("/seller/")) {
+                    return token.role === "SELLER"
+                }
+
+                // Par défaut, autoriser si token existe
+                return true
             },
         },
-    }
+    },
 )
 
 export const config = {
-    matcher: [
-        /*
-         * Match all request paths except for the ones starting with:
-         * - api/auth (NextAuth routes)
-         * - _next/static (static files)
-         * - _next/image (image optimization files)
-         * - favicon.ico (favicon file)
-         */
-        '/((?!api/auth|_next/static|_next/image|favicon.ico).*)',
-    ]
+    matcher: ["/client/:path*", "/seller/:path*", "/api/protected/:path*"],
 }

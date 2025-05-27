@@ -4,7 +4,6 @@ import CredentialsProvider from "next-auth/providers/credentials"
 import GoogleProvider from "next-auth/providers/google"
 import { prisma } from "./prisma"
 import bcrypt from "bcryptjs"
-import type { Role } from "@prisma/client"
 
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma),
@@ -68,47 +67,21 @@ export const authOptions: NextAuthOptions = {
       return token
     },
     async session({ session, token }) {
-      if (token) {
+      if (token && session.user) {
         session.user.id = token.sub!
-        session.user.role = token.role as Role
+        session.user.role = token.role as "CLIENT" | "SELLER"
         session.user.client = token.client
         session.user.seller = token.seller
       }
       return session
     },
     async signIn({ user, account, profile }) {
-      if (account?.provider === "google") {
-        // Créer un utilisateur avec le rôle CLIENT par défaut pour Google OAuth
-        const existingUser = await prisma.user.findUnique({
-          where: { email: user.email! },
-        })
-
-        if (!existingUser) {
-          const newUser = await prisma.user.create({
-            data: {
-              email: user.email!,
-              username: user.email!.split("@")[0],
-              role: "CLIENT",
-              emailVerified: new Date(),
-              image: user.image,
-            },
-          })
-
-          // Créer le profil client
-          await prisma.client.create({
-            data: {
-              userId: newUser.id,
-              firstname: user.name?.split(" ")[0] || "",
-              lastname: user.name?.split(" ").slice(1).join(" ") || "",
-            },
-          })
-        }
-      }
+      // Autoriser toutes les connexions valides
       return true
     },
   },
   pages: {
     signIn: "/auth/login",
-    signUp: "/auth/register",
   },
+  debug: process.env.NODE_ENV === "development",
 }
