@@ -21,7 +21,7 @@ export default function ClientAccount() {
         <div className="container mx-auto py-8 px-4">
             <div className="mb-6">
                 <h1 className="text-2xl font-bold text-gray-900">Mon Compte Client</h1>
-                <p className="text-gray-600">Bienvenue {user?.name}</p>
+                <p className="text-gray-600">Bienvenue {user?.client?.firstname}</p>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -35,7 +35,13 @@ export default function ClientAccount() {
                             <strong>Email:</strong> {user?.email}
                         </p>
                         <p>
-                            <strong>Téléphone:</strong> {user?.client?.phone || "Non renseigné"}
+                            <strong>Téléphone:</strong> {user?.client?.phoneNumber || "Non renseigné"}
+                        </p>
+                        <p>
+                            <strong>Adresse:</strong> {user?.client?.address || "Non renseignée"}
+                        </p>
+                        <p>
+                            <strong>Code postal:</strong> {user?.client?.postalCode || "Non renseigné"}
                         </p>
                     </div>
                 </div>

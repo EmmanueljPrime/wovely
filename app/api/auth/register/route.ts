@@ -5,9 +5,37 @@ import { prisma } from "@/lib/prisma"
 export async function POST(request: NextRequest) {
     try {
         const body = await request.json()
-        const { email, username, password, role, firstname, lastname, business_name } = body
 
-        // Vérifier si l'utilisateur existe déjà
+        const {
+            email,
+            username,
+            password,
+            role,
+
+            // Champs CLIENT
+            firstname,
+            lastname,
+            phoneNumber,
+            address,
+            postalCode,
+            agreeTerms,
+            receiveAlerts,
+
+            // Champs SELLER
+            business_name,
+            fullName,
+            servicesOffered,
+            yearsOfExperience,
+            companyType,
+            siretNumber,
+            companyAddress,
+            companyCity,
+            companyPostalCode,
+            companyCountry,
+            companyPhoneNumber,
+        } = body
+
+        // Vérification : utilisateur existant
         const existingUser = await prisma.user.findFirst({
             where: {
                 OR: [{ email }, { username }],
@@ -16,38 +44,62 @@ export async function POST(request: NextRequest) {
 
         if (existingUser) {
             return NextResponse.json(
-                { message: "Un utilisateur avec cet email ou nom d'utilisateur existe déjà" },
-                { status: 400 },
+                { message: "Un utilisateur avec cet email ou ce nom d'utilisateur existe déjà." },
+                { status: 400 }
             )
         }
 
-        // Hasher le mot de passe
+        // Hash du mot de passe
         const hashedPassword = await bcrypt.hash(password, 12)
 
-        // Créer l'utilisateur
+        // Création de l'utilisateur
         const user = await prisma.user.create({
             data: {
                 email,
                 username,
                 password: hashedPassword,
-                role: role as "CLIENT" | "SELLER",
+                role,
+                profile_picture: null,
+                image: null,
+                created_at: new Date(),
             },
         })
 
-        // Créer le profil selon le rôle
+        // Création du profil selon le rôle
         if (role === "CLIENT") {
             await prisma.client.create({
                 data: {
                     userId: user.id,
-                    firstname: firstname || "",
-                    lastname: lastname || "",
+                    firstname,
+                    lastname,
+                    phoneNumber: phoneNumber || null,
+                    address: address || null,
+                    postalCode: postalCode || null,
+                    agreeTerms: agreeTerms ?? false,
+                    receiveAlerts: receiveAlerts ?? false,
                 },
             })
-        } else if (role === "SELLER") {
+        }
+
+        if (role === "SELLER") {
             await prisma.seller.create({
                 data: {
                     userId: user.id,
-                    business_name: business_name || "",
+                    business_name,
+                    fullName: fullName || null,
+                    phoneNumber: phoneNumber || null,
+                    servicesOffered: servicesOffered || null,
+                    yearsOfExperience: yearsOfExperience || null,
+                    agreeTerms: agreeTerms ?? false,
+                    receiveAlerts: receiveAlerts ?? false,
+
+                    companyType: companyType || null,
+                    siretNumber: siretNumber || null,
+                    companyAddress: companyAddress || null,
+                    companyCity: companyCity || null,
+                    companyPostalCode: companyPostalCode || null,
+                    companyCountry: companyCountry || null,
+                    companyPhoneNumber: companyPhoneNumber || null,
                 },
             })
         }
@@ -61,10 +113,13 @@ export async function POST(request: NextRequest) {
                     role: user.role,
                 },
             },
-            { status: 201 },
+            { status: 201 }
         )
     } catch (error) {
         console.error("Erreur lors de l'inscription:", error)
-        return NextResponse.json({ message: "Erreur interne du serveur" }, { status: 500 })
+        return NextResponse.json(
+            { message: "Erreur interne du serveur" },
+            { status: 500 }
+        )
     }
 }

@@ -49,15 +49,15 @@ model User {
   username        String    @unique
   password        String? // Optionnel pour OAuth
   profile_picture String?
-  emailVerified   DateTime? // Requis pour NextAuth
-  image           String? // Requis pour NextAuth
+  emailVerified   DateTime?
+  image           String?
   created_at      DateTime  @default(now())
 
   // Relations NextAuth
   accounts Account[]
   sessions Session[]
 
-  // Relations existantes
+  // Relations internes
   sentMessages     Message[]      @relation("SenderMessages")
   receivedMessages Message[]      @relation("RecipientMessages")
   notifications    Notification[]
@@ -66,13 +66,17 @@ model User {
   seller           Seller?
 }
 
-// Reste de vos modèles inchangés...
 model Client {
-  id        Int    @id @default(autoincrement())
-  firstname String
-  lastname  String
+  id            Int     @id @default(autoincrement())
+  firstname     String
+  lastname      String
+  phoneNumber   String?
+  address       String?
+  postalCode    String?
+  agreeTerms    Boolean @default(false)
+  receiveAlerts Boolean @default(false)
 
-  //Relations
+  // Relations
   userId   Int       @unique
   user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   projects Project[]
@@ -80,16 +84,31 @@ model Client {
 }
 
 model Seller {
-  id            Int    @id @default(autoincrement())
-  business_name String
+  id                Int     @id @default(autoincrement())
+  business_name     String
+  fullName          String?
+  phoneNumber       String?
+  servicesOffered   String?
+  yearsOfExperience String?
+  agreeTerms        Boolean @default(false)
+  receiveAlerts     Boolean @default(false)
 
-  //Relations
+  // Pour les tailors professionnels
+  companyType        String?
+  siretNumber        String?
+  companyAddress     String?
+  companyCity        String?
+  companyPostalCode  String?
+  companyCountry     String?
+  companyPhoneNumber String?
+
+  // Relations
+  userId    Int        @unique
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
   products  Product[]
   adverts   Advert[]
   orders    Order[]
   proposals Proposal[]
-  userId    Int        @unique
-  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
   projects  Project[]  @relation("SellerProject")
 }
 

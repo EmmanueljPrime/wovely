@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useRequireRole } from "@/hooks/use-auth"
+import { useSession } from "next-auth/react"
 import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -22,9 +22,11 @@ import {
     AlertDialogTitle,
     AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
+import { useRouter } from "next/navigation"
 
 export default function ClientSettings() {
-    const { user, isLoading, hasCorrectRole } = useRequireRole("CLIENT")
+    const { data: session, status } = useSession()
+    const router = useRouter()
     const [loading, setLoading] = useState(false)
     const [message, setMessage] = useState("")
     const [messageType, setMessageType] = useState<"success" | "error" | "">("")
@@ -39,6 +41,8 @@ export default function ClientSettings() {
         city: "",
         postalCode: "",
         country: "",
+        agreeTerms: false,
+        receiveAlerts: false,
     })
 
     const [passwordData, setPasswordData] = useState({
@@ -54,20 +58,42 @@ export default function ClientSettings() {
         language: "fr",
     })
 
+    // Vérification d'accès
     useEffect(() => {
-        if (user?.client) {
+        if (status === "loading") return // Encore en chargement
+
+        if (status === "unauthenticated") {
+            router.push("/auth/login")
+            return
+        }
+
+        if (session?.user?.role !== "CLIENT") {
+            router.push("/unauthorized")
+            return
+        }
+    }, [session, status, router])
+
+    useEffect(() => {
+        console.log("=== SESSION DEBUG ===")
+        console.log("Session:", session)
+        console.log("Session user:", session?.user)
+        console.log("Session user createdAt:", session?.user?.createdAt)
+
+        if (session?.user?.client) {
             setProfileData({
-                firstname: user.client.firstname || "",
-                lastname: user.client.lastname || "",
-                email: user.email || "",
-                phone: user.client.phone || "",
-                address: user.client.address || "",
-                city: user.client.city || "",
-                postalCode: user.client.postalCode || "",
-                country: user.client.country || "",
+                firstname: session.user.client.firstname || "",
+                lastname: session.user.client.lastname || "",
+                email: session.user.email || "",
+                phone: session.user.client.phoneNumber || "",
+                address: session.user.client.address || "",
+                city: session.user.client.city || "",
+                postalCode: session.user.client.postalCode || "",
+                country: session.user.client.country || "",
+                agreeTerms: session.user.client.agreeTerms || false,
+                receiveAlerts: session.user.client.receiveAlerts || false,
             })
         }
-    }, [user])
+    }, [session])
 
     const showMessage = (text: string, type: "success" | "error") => {
         setMessage(text)
@@ -169,14 +195,14 @@ export default function ClientSettings() {
     // Fonction pour formater la date de création
     const getCreationDate = () => {
         console.log("=== DEBUG DATE ===")
-        console.log("User data:", user)
-        console.log("User createdAt:", user?.createdAt)
-        console.log("User createdAt type:", typeof user?.createdAt)
+        console.log("Session user:", session?.user)
+        console.log("Session user createdAt:", session?.user?.createdAt)
+        console.log("Session user createdAt type:", typeof session?.user?.createdAt)
 
         // Priorité 1: Date de création de l'utilisateur (string ISO)
-        if (user?.createdAt) {
+        if (session?.user?.createdAt) {
             try {
-                const date = new Date(user.createdAt)
+                const date = new Date(session.user.createdAt)
                 console.log("Parsed date:", date)
                 console.log("Is valid date:", !isNaN(date.getTime()))
                 if (!isNaN(date.getTime())) {
@@ -190,9 +216,9 @@ export default function ClientSettings() {
         }
 
         // Priorité 2: Date de création du profil client
-        if (user?.client?.createdAt) {
+        if (session?.user?.client?.createdAt) {
             try {
-                const date = new Date(user.client.createdAt)
+                const date = new Date(session.user.client.createdAt)
                 if (!isNaN(date.getTime())) {
                     return date.toLocaleDateString("fr-FR")
                 }
@@ -205,7 +231,7 @@ export default function ClientSettings() {
         return "Non disponible"
     }
 
-    if (isLoading) {
+    if (status === "loading") {
         return (
             <div className="flex items-center justify-center min-h-screen">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-teal-600"></div>
@@ -213,7 +239,7 @@ export default function ClientSettings() {
         )
     }
 
-    if (!hasCorrectRole) {
+    if (status === "unauthenticated" || session?.user?.role !== "CLIENT") {
         return null
     }
 
@@ -470,10 +496,10 @@ export default function ClientSettings() {
                                 <h3 className="text-lg font-medium">Informations du compte</h3>
                                 <div className="bg-gray-50 p-4 rounded-md">
                                     <p>
-                                        <strong>Email:</strong> {user?.email}
+                                        <strong>Email:</strong> {session?.user?.email}
                                     </p>
                                     <p>
-                                        <strong>Nom d'utilisateur:</strong> {user?.name}
+                                        <strong>Nom d'utilisateur:</strong> {session?.user?.name}
                                     </p>
                                     <p>
                                         <strong>Membre depuis:</strong> {getCreationDate()}

@@ -119,6 +119,11 @@ export default function RegisterPage() {
           role: "CLIENT",
           firstname: customerFormData.fullName.split(" ")[0],
           lastname: customerFormData.fullName.split(" ").slice(1).join(" "),
+          phoneNumber: customerFormData.phoneNumber,
+          address: customerFormData.address,
+          postalCode: customerFormData.postalCode,
+          agreeTerms: customerFormData.agreeTerms,
+          receiveAlerts: customerFormData.receiveAlerts,
         }),
       })
 
@@ -180,6 +185,12 @@ export default function RegisterPage() {
           password: individualTailorFormData.password,
           role: "SELLER",
           business_name: individualTailorFormData.profileName,
+          fullName: individualTailorFormData.fullName,
+          phoneNumber: individualTailorFormData.phoneNumber,
+          servicesOffered: individualTailorFormData.servicesOffered,
+          yearsOfExperience: individualTailorFormData.yearsOfExperience,
+          agreeTerms: individualTailorFormData.agreeTerms,
+          receiveAlerts: individualTailorFormData.receiveAlerts,
         }),
       })
 
@@ -241,6 +252,17 @@ export default function RegisterPage() {
           password: professionalTailorFormData.password,
           role: "SELLER",
           business_name: professionalTailorFormData.companyName,
+          firstName: professionalTailorFormData.firstName,
+          lastName: professionalTailorFormData.lastName,
+          companyType: professionalTailorFormData.companyType,
+          siretNumber: professionalTailorFormData.siretNumber,
+          companyAddress: professionalTailorFormData.address,
+          companyCity: professionalTailorFormData.city,
+          companyPostalCode: professionalTailorFormData.postalCode,
+          companyCountry: professionalTailorFormData.country,
+          companyPhoneNumber: professionalTailorFormData.companyPhoneNumber,
+          agreeTerms: professionalTailorFormData.agreeTerms,
+          receiveAlerts: professionalTailorFormData.receiveAlerts,
         }),
       })
 
