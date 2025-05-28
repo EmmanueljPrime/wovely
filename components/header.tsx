@@ -15,7 +15,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Settings, LogOut } from "lucide-react"
+import { Settings, LogOut, FolderKanban  } from "lucide-react"
 import { usePathname } from "next/navigation"
 
 export default function Header() {
@@ -158,6 +158,15 @@ export default function Header() {
                         <Link href={getDashboardUrl()} className="flex items-center">
                           <User className="mr-2 h-4 w-4" />
                           <span>Mon compte</span>
+                        </Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem asChild>
+                        <Link
+                            href={session?.user?.role === "CLIENT" ? "/client/projects" : "/seller/projects"}
+                            className="flex items-center"
+                        >
+                          <FolderKanban className="mr-2 h-4 w-4" />
+                          <span>Projets</span>
                         </Link>
                       </DropdownMenuItem>
                       <DropdownMenuItem asChild>

@@ -5,21 +5,31 @@ import { prisma } from "@/lib/prisma"
 
 export async function GET(request: NextRequest) {
     try {
+        console.log("📥 Requête GET reçue pour les projets clients")
+
         const session = await getServerSession(authOptions)
+        console.log("🧾 Session utilisateur :", session)
 
         if (!session?.user || session.user.role !== "SELLER") {
+            console.warn("⛔ Accès refusé - utilisateur non authentifié ou pas SELLER")
             return NextResponse.json({ error: "Non autorisé" }, { status: 401 })
         }
 
-        // Récupérer tous les projets ouverts créés par les clients
+        const sellerId = session.user.seller?.id
+        if (!sellerId) {
+            console.error("❌ ID du vendeur non trouvé dans la session")
+            return NextResponse.json({ error: "Identifiant du vendeur manquant" }, { status: 400 })
+        }
+
+        console.log("🔍 ID vendeur :", sellerId)
+
         const projects = await prisma.project.findMany({
             where: {
-                status: "OPEN", // Seulement les projets ouverts
-                // Exclure les projets où ce seller a déjà une offre acceptée
+                status: "OPEN",
                 NOT: {
                     proposals: {
                         some: {
-                            sellerId: session.user.seller?.id,
+                            sellerId,
                             status: "ACCEPTED",
                         },
                     },
@@ -30,7 +40,7 @@ export async function GET(request: NextRequest) {
                     include: {
                         user: {
                             select: {
-                                name: true,
+                                username: true,
                                 email: true,
                             },
                         },
@@ -43,21 +53,19 @@ export async function GET(request: NextRequest) {
                 },
             },
             orderBy: {
-                createdAt: "desc",
+                created_at: "desc",
             },
         })
 
-        // Formater les données pour l'affichage
+        console.log(`✅ ${projects.length} projets ouverts trouvés`)
+
         const formattedProjects = projects.map((project) => ({
             id: project.id,
             title: project.title,
             description: project.description,
-            budget: project.budget,
             deadline: project.deadline,
-            category: project.category,
             status: project.status.toLowerCase(),
-            location: project.location,
-            createdAt: project.createdAt,
+            createdAt: project.created_at,
             client: {
                 name: project.client.user.name,
                 email: project.client.user.email,
@@ -67,9 +75,14 @@ export async function GET(request: NextRequest) {
             },
         }))
 
+        console.log("🧾 Projets formatés :", formattedProjects)
+
         return NextResponse.json(formattedProjects)
     } catch (error) {
-        console.error("Erreur lors de la récupération des projets:", error)
-        return NextResponse.json({ error: "Erreur lors de la récupération des projets" }, { status: 500 })
+        console.error("🔥 Erreur lors de la récupération des projets:", error)
+        return NextResponse.json(
+            { error: "Erreur lors de la récupération des projets", detail: (error as Error).message },
+            { status: 500 }
+        )
     }
 }
