@@ -6,15 +6,21 @@ import { prisma } from "@/lib/prisma"
 export async function GET(request: NextRequest) {
     try {
         const session = await getServerSession(authOptions)
+        console.log("🟢 Session récupérée:", session)
 
         if (!session?.user || session.user.role !== "CLIENT") {
+            console.warn("🔒 Accès non autorisé ou utilisateur non client")
             return NextResponse.json({ error: "Non autorisé" }, { status: 401 })
         }
 
+        const clientId = session.user.client?.id
+        if (!clientId) {
+            console.error("❌ clientId introuvable dans la session utilisateur")
+            return NextResponse.json({ error: "Client introuvable" }, { status: 400 })
+        }
+
         const projects = await prisma.project.findMany({
-            where: {
-                clientId: session.user.client?.id,
-            },
+            where: { clientId },
             include: {
                 _count: {
                     select: {
@@ -23,13 +29,15 @@ export async function GET(request: NextRequest) {
                 },
             },
             orderBy: {
-                createdAt: "desc",
+                created_at: "desc",
             },
         })
 
-        return NextResponse.json(projects)
+        console.log(`✅ ${projects.length} projets récupérés pour le client ${clientId}`)
+
+        return NextResponse.json({ projects })
     } catch (error) {
-        console.error("Erreur lors de la récupération des projets:", error)
+        console.error("🔥 Erreur lors de la récupération des projets:", error)
         return NextResponse.json({ error: "Erreur lors de la récupération des projets" }, { status: 500 })
     }
 }
@@ -37,30 +45,35 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
     try {
         const session = await getServerSession(authOptions)
+        console.log("🔐 Session backend :", session)
 
         if (!session?.user || session.user.role !== "CLIENT") {
+            console.warn("🔒 Accès refusé : utilisateur non authentifié ou non CLIENT")
             return NextResponse.json({ error: "Non autorisé" }, { status: 401 })
         }
 
         const body = await request.json()
-        const { title, description, category, budget, deadline, location } = body
+        console.log("📥 Données reçues :", body)
+
+        const { title, description, deadline } = body
 
         const project = await prisma.project.create({
             data: {
                 title,
                 description,
-                category,
-                budget,
                 deadline: deadline ? new Date(deadline) : null,
-                location,
                 clientId: session.user.client?.id!,
                 status: "OPEN",
             },
         })
 
+        console.log("✅ Projet créé :", project)
         return NextResponse.json(project, { status: 201 })
     } catch (error) {
-        console.error("Erreur lors de la création du projet:", error)
-        return NextResponse.json({ error: "Erreur lors de la création du projet" }, { status: 500 })
+        console.error("🔥 Erreur lors de la création du projet :", error)
+        return NextResponse.json(
+            { error: "Erreur lors de la création du projet", detail: (error as Error).message },
+            { status: 500 }
+        )
     }
 }

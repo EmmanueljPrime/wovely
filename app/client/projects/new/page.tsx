@@ -1,20 +1,16 @@
 "use client"
 
 import type React from "react"
-
-import { useRequireRole } from "@/hooks/use-auth"
 import { useState } from "react"
 import Link from "next/link"
+import { useRequireRole } from "@/hooks/use-auth"
 
 export default function NewProject() {
     const { user, isLoading, hasCorrectRole } = useRequireRole("CLIENT")
     const [formData, setFormData] = useState({
         title: "",
         description: "",
-        category: "",
-        budget: "",
         deadline: "",
-        location: "",
     })
     const [submitting, setSubmitting] = useState(false)
 
@@ -35,6 +31,8 @@ export default function NewProject() {
         setSubmitting(true)
 
         try {
+            console.log("🟢 Données envoyées :", formData)
+
             const response = await fetch("/api/client/projects", {
                 method: "POST",
                 headers: {
@@ -43,13 +41,20 @@ export default function NewProject() {
                 body: JSON.stringify(formData),
             })
 
-            if (response.ok) {
-                window.location.href = "/client/projects"
-            } else {
-                alert("Erreur lors de la création du projet")
+            const result = await response.json()
+            console.log("📦 Réponse du serveur :", result)
+
+            if (!response.ok) {
+                const result = await response.json()
+                console.error("🟥 Statut HTTP :", response.status)
+                console.error("🟥 Erreur backend :", result)
+                alert("Erreur lors de la création du projet : " + (result?.error ?? "erreur inconnue"))
+                return
             }
+
+            window.location.href = "/client/projects"
         } catch (error) {
-            console.error("Erreur:", error)
+            console.error("🔥 Erreur lors de la requête :", error)
             alert("Erreur lors de la création du projet")
         } finally {
             setSubmitting(false)
@@ -112,45 +117,6 @@ export default function NewProject() {
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">
-                                    Catégorie <span className="text-red-500">*</span>
-                                </label>
-                                <select
-                                    name="category"
-                                    required
-                                    value={formData.category}
-                                    onChange={handleChange}
-                                    className="w-full border border-gray-300 rounded-md px-3 py-2"
-                                >
-                                    <option value="">Sélectionnez une catégorie</option>
-                                    <option value="suits">Costumes</option>
-                                    <option value="dresses">Robes</option>
-                                    <option value="shirts">Chemises</option>
-                                    <option value="pants">Pantalons</option>
-                                    <option value="alterations">Retouches</option>
-                                    <option value="accessories">Accessoires</option>
-                                    <option value="other">Autre</option>
-                                </select>
-                            </div>
-
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">
-                                    Budget estimé <span className="text-red-500">*</span>
-                                </label>
-                                <input
-                                    type="text"
-                                    name="budget"
-                                    required
-                                    value={formData.budget}
-                                    onChange={handleChange}
-                                    className="w-full border border-gray-300 rounded-md px-3 py-2"
-                                    placeholder="Ex: €500 - €800"
-                                />
-                            </div>
-                        </div>
-
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-2">Date limite</label>
                                 <input
                                     type="date"
@@ -160,19 +126,8 @@ export default function NewProject() {
                                     className="w-full border border-gray-300 rounded-md px-3 py-2"
                                 />
                             </div>
-
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">Localisation</label>
-                                <input
-                                    type="text"
-                                    name="location"
-                                    value={formData.location}
-                                    onChange={handleChange}
-                                    className="w-full border border-gray-300 rounded-md px-3 py-2"
-                                    placeholder="Ex: Paris, France"
-                                />
-                            </div>
                         </div>
+
                     </div>
 
                     <div className="mt-8 flex justify-end space-x-3">

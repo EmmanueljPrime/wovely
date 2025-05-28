@@ -147,13 +147,14 @@ model Category {
 }
 
 model Project {
-  id          Int      @id @default(autoincrement())
+  id          Int       @id @default(autoincrement())
   title       String
-  description String   @db.Text
-  deadline    DateTime
-  status      String   @default("pending") //Status: pending, accepted, in_progress, completed
-  created_at  DateTime @default(now())
-  updated_at  DateTime @updatedAt
+  description String    @db.Text
+  deadline    DateTime?
+  status      String    @default("pending") //Status: pending, accepted, in_progress, completed
+  images      String[]
+  created_at  DateTime  @default(now())
+  updated_at  DateTime  @updatedAt
 
   //Relations
   proposals Proposal[]
