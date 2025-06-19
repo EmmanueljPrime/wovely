@@ -112,21 +112,39 @@ model Seller {
   projects  Project[]  @relation("SellerProject")
 }
 
+model ProductStock {
+  id        Int     @id @default(autoincrement())
+  product   Product @relation(fields: [productId], references: [id])
+  productId Int
+
+  size   Size   @relation(fields: [sizeId], references: [id])
+  sizeId String
+
+  quantity Int
+}
+
 model Product {
   id          Int      @id @default(autoincrement())
   name        String
   description String   @db.Text
   price       Decimal  @db.Decimal(10, 2)
-  stock       Int
   created_at  DateTime @default(now())
   updated_at  DateTime @updatedAt
 
   //Relations
-  images     Image[]
-  categories Category[]
-  orders     Order[]
-  sellerId   Int
-  seller     Seller     @relation(fields: [sellerId], references: [id])
+  images      Image[]
+  orders      Order[]
+  sellerId    Int
+  seller      Seller         @relation(fields: [sellerId], references: [id])
+  categoryId  String?
+  category    Category?      @relation(fields: [categoryId], references: [id])
+  sizeId      String?
+  size        Size?          @relation(fields: [sizeId], references: [id])
+  colorId     String?
+  color       Color?         @relation(fields: [colorId], references: [id])
+  materialId  String?
+  material    Material?      @relation(fields: [materialId], references: [id])
+  stockBySize ProductStock[]
 }
 
 model Image {
@@ -139,10 +157,27 @@ model Image {
 }
 
 model Category {
-  id   Int    @id @default(autoincrement())
-  name String
+  id       String    @id @default(cuid())
+  name     String    @unique
+  products Product[] // relation inverse
+}
 
-  //Relations
+model Size {
+  id           String         @id @default(cuid())
+  name         String         @unique
+  products     Product[]
+  ProductStock ProductStock[]
+}
+
+model Color {
+  id       String    @id @default(cuid())
+  name     String    @unique
+  products Product[]
+}
+
+model Material {
+  id       String    @id @default(cuid())
+  name     String    @unique
   products Product[]
 }
 

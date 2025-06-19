@@ -26,12 +26,9 @@ export async function GET(request: NextRequest) {
         const projects = await prisma.project.findMany({
             where: {
                 status: "OPEN",
-                NOT: {
-                    proposals: {
-                        some: {
-                            sellerId,
-                            status: "ACCEPTED",
-                        },
+                proposals: {
+                    none: {
+                        status: "accepted", // on exclut les projets avec une proposition acceptée
                     },
                 },
             },

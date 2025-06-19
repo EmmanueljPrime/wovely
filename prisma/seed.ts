@@ -1,10 +1,10 @@
+// prisma/seed.ts
 import { PrismaClient, Role } from "@prisma/client"
 import * as bcrypt from "bcryptjs"
 
 const prisma = new PrismaClient()
 
 async function main() {
-  // Clear existing data
   await prisma.notification.deleteMany()
   await prisma.message.deleteMany()
   await prisma.order.deleteMany()
@@ -12,285 +12,197 @@ async function main() {
   await prisma.advert.deleteMany()
   await prisma.project.deleteMany()
   await prisma.image.deleteMany()
+  await prisma.productStock.deleteMany()
   await prisma.product.deleteMany()
   await prisma.category.deleteMany()
+  await prisma.material.deleteMany()
+  await prisma.color.deleteMany()
+  await prisma.size.deleteMany()
   await prisma.seller.deleteMany()
   await prisma.client.deleteMany()
   await prisma.user.deleteMany()
 
-  console.log("Cleared existing data")
+  console.log("Données existantes supprimées")
 
-  // Create categories
-  const categories = await Promise.all([
-    prisma.category.create({ data: { name: "Shirts" } }),
-    prisma.category.create({ data: { name: "Pants" } }),
-    prisma.category.create({ data: { name: "Dresses" } }),
-    prisma.category.create({ data: { name: "Suits" } }),
-    prisma.category.create({ data: { name: "Accessories" } }),
-  ])
+  const categoryData = [
+    { id: 'cat-robes', name: "Robes" },
+    { id: 'cat-costumes', name: "Costumes" },
+    { id: 'cat-tshirts', name: "T-shirts" },
+    { id: 'cat-pantalons', name: "Pantalons" },
+    { id: 'cat-pulls', name: "Pulls" },
+    { id: 'cat-accessoires', name: "Accessoires" },
+    { id: 'cat-chemisiers', name: "Chemisiers" },
+  ]
 
-  console.log("Created categories")
+  const sizeData = [
+    { id: 'size-s', name: "S" },
+    { id: 'size-m', name: "M" },
+    { id: 'size-l', name: "L" },
+    { id: 'size-xl', name: "XL" },
+  ]
 
-  // Hash password
-  const password = await bcrypt.hash("password123", 10)
+  const colorData = [
+    { id: 'color-black', name: "Noir" },
+    { id: 'color-white', name: "Blanc" },
+    { id: 'color-red', name: "Rouge" },
+    { id: 'color-blue', name: "Bleu" },
+  ]
 
-  // Create client users
-  const clientUser1 = await prisma.user.create({
-    data: {
-      email: "client1@example.com",
-      username: "client1",
-      password,
-      role: Role.CLIENT,
-    },
-  })
+  const materialData = [
+    { id: 'mat-coton', name: "Coton" },
+    { id: 'mat-laine', name: "Laine" },
+    { id: 'mat-soie', name: "Soie" },
+  ]
 
-  const clientUser2 = await prisma.user.create({
-    data: {
-      email: "client2@example.com",
-      username: "client2",
-      password,
-      role: Role.CLIENT,
-    },
-  })
+  await prisma.category.createMany({ data: categoryData })
+  await prisma.size.createMany({ data: sizeData })
+  await prisma.color.createMany({ data: colorData })
+  await prisma.material.createMany({ data: materialData })
 
-  // Create client profiles
-  const client1 = await prisma.client.create({
-    data: {
-      firstname: "John",
-      lastname: "Doe",
-      userId: clientUser1.id,
-    },
-  })
+  const password = await bcrypt.hash("wovelypass", 10)
 
-  const client2 = await prisma.client.create({
-    data: {
-      firstname: "Jane",
-      lastname: "Smith",
-      userId: clientUser2.id,
-    },
-  })
+  const clientInfos = [
+    ["Alice", "Durand", "alice.durand@wovely.com", "alice"],
+    ["Camille", "Petit", "camille.petit@wovely.com", "camille"],
+    ["Léa", "Bernard", "lea.bernard@wovely.com", "lea"],
+    ["Nina", "Giraud", "nina.giraud@wovely.com", "nina"],
+    ["Sophie", "Lemoine", "sophie.lemoine@wovely.com", "sophie"],
+    ["Emma", "Roux", "emma.roux@wovely.com", "emma"],
+    ["Julie", "Fabre", "julie.fabre@wovely.com", "julie"],
+    ["Clara", "Noel", "clara.noel@wovely.com", "clara"],
+    ["Chloé", "Marchand", "chloe.marchand@wovely.com", "chloe"],
+    ["Eva", "Pires", "eva.pires@wovely.com", "eva"]
+  ]
 
-  console.log("Created client users")
-
-  // Create seller users
-  const sellerUser1 = await prisma.user.create({
-    data: {
-      email: "seller1@example.com",
-      username: "seller1",
-      password,
-      role: Role.SELLER,
-    },
-  })
-
-  const sellerUser2 = await prisma.user.create({
-    data: {
-      email: "seller2@example.com",
-      username: "seller2",
-      password,
-      role: Role.SELLER,
-    },
-  })
-
-  // Create seller profiles
-  const seller1 = await prisma.seller.create({
-    data: {
-      business_name: "Elite Tailors",
-      userId: sellerUser1.id,
-    },
-  })
-
-  const seller2 = await prisma.seller.create({
-    data: {
-      business_name: "Fashion Masters",
-      userId: sellerUser2.id,
-    },
-  })
-
-  console.log("Created seller users")
-
-  // Create products
-  const product1 = await prisma.product.create({
-    data: {
-      name: "Custom Suit",
-      description: "Handmade custom suit tailored to your measurements",
-      price: 599.99,
-      stock: 10,
-      sellerId: seller1.id,
-      categories: {
-        connect: [{ id: categories[3].id }], // Suits
+  const clients = []
+  for (let i = 0; i < clientInfos.length; i++) {
+    const [firstname, lastname, email, username] = clientInfos[i]
+    const user = await prisma.user.create({
+      data: { email, username, password, role: Role.CLIENT },
+    })
+    const client = await prisma.client.create({
+      data: {
+        firstname,
+        lastname,
+        phoneNumber: `060000000${i + 1}`,
+        userId: user.id,
+        agreeTerms: true,
+        receiveAlerts: i % 2 === 0,
       },
-      images: {
-        create: [{ url: "https://example.com/images/suit1.jpg" }, { url: "https://example.com/images/suit2.jpg" }],
+    })
+    clients.push(client)
+  }
+
+  const sellerInfos = [
+    ["Marc", "Dupont", "Atelier Marc Couture", "marc@wovely.com", "marc"],
+    ["Julie", "Tailleur", "Maison Julie", "julie@wovely.com", "juliet"],
+    ["Antoine", "Blanc", "Antoine Créations", "antoine@wovely.com", "antoine"],
+    ["Sophie", "Germain", "Sophie Design", "sophie@wovely.com", "sophieg"],
+    ["Lucas", "Moreau", "Couture Moreau", "lucas@wovely.com", "lucas"]
+  ]
+
+  const sellers = []
+  for (let i = 0; i < sellerInfos.length; i++) {
+    const [firstname, lastname, business_name, email, username] = sellerInfos[i]
+    const user = await prisma.user.create({
+      data: { email, username, password, role: Role.SELLER },
+    })
+    const seller = await prisma.seller.create({
+      data: {
+        business_name,
+        fullName: `${firstname} ${lastname}`,
+        phoneNumber: `070000000${i + 1}`,
+        servicesOffered: "Création sur mesure, Retouche, Broderie",
+        yearsOfExperience: `${i + 3}`,
+        userId: user.id,
+        agreeTerms: true,
+        receiveAlerts: i % 2 === 1,
       },
-    },
-  })
+    })
+    sellers.push(seller)
+  }
 
-  const product2 = await prisma.product.create({
-    data: {
-      name: "Dress Shirt",
-      description: "Premium cotton dress shirt",
-      price: 89.99,
-      stock: 25,
-      sellerId: seller1.id,
-      categories: {
-        connect: [{ id: categories[0].id }], // Shirts
-      },
-      images: {
-        create: [{ url: "https://example.com/images/shirt1.jpg" }],
-      },
-    },
-  })
+  const productData = [
+    { name: "Veste Synthétique", image: "vestesyntetic.jpg", price: 89.99, category: 'cat-costumes' },
+    { name: "Polo Noir", image: "polonoir.jpg", price: 29.99, category: 'cat-accessoires' },
+    { name: "Veste Costume Gris", image: "vestecostumegris.jpg", price: 149.99, category: 'cat-costumes' },
+    { name: "Robe Jean", image: "robejean.jpg", price: 59.99, category: 'cat-robes' },
+    { name: "Poncho Laine", image: "poncholaine.jpg", price: 69.99, category: 'cat-accessoires' },
+    { name: "T-Shirt Blanc 1", image: "tshirtblanc1.jpg", price: 19.99, category: 'cat-tshirts' },
+    { name: "Veste Mouton", image: "vestemouton.jpg", price: 119.99, category: 'cat-costumes' },
+    { name: "Chemise Rouge et Blanche", image: "chemiserougeblanc.jpg", price: 39.99, category: 'cat-chemisiers' },
+    { name: "T-Shirt Blanc 5", image: "tshirtblanc5.jpg", price: 17.99, category: 'cat-tshirts' },
+    { name: "Veste Rouge", image: "vesterouge.jpg", price: 99.99, category: 'cat-costumes' },
+    { name: "T-Shirt Jaune", image: "tshirtjaune.jpg", price: 21.99, category: 'cat-tshirts' },
+    { name: "Veste Jean", image: "vestejean.jpg", price: 89.99, category: 'cat-costumes' },
+    { name: "Veste Dickies", image: "vestedickies.jpg", price: 109.99, category: 'cat-costumes' },
+    { name: "T-Shirt Blanc 3", image: "tshirtblanc3.jpg", price: 19.49, category: 'cat-tshirts' },
+    { name: "Pantalon Beige", image: "pantalonbeige.jpg", price: 49.99, category: 'cat-pantalons' },
+    { name: "T-Shirt Blanc 4", image: "tshirtblanc4.jpg", price: 18.99, category: 'cat-tshirts' },
+    { name: "Pull Laine Bleu", image: "pulllainebleu.jpg", price: 79.99, category: 'cat-pulls' },
+    { name: "Lot T-Shirt", image: "lottshirt.jpg", price: 39.99, category: 'cat-tshirts' },
+    { name: "Ensemble Jogging Jaune", image: "ensemblejoggingjaune.jpg", price: 89.99, category: 'cat-pantalons' },
+    { name: "T-Shirt Blanc 2", image: "tshirtblanc2.jpg", price: 17.99, category: 'cat-tshirts' },
+  ]
 
-  const product3 = await prisma.product.create({
-    data: {
-      name: "Evening Dress",
-      description: "Elegant evening dress for special occasions",
-      price: 299.99,
-      stock: 5,
-      sellerId: seller2.id,
-      categories: {
-        connect: [{ id: categories[2].id }], // Dresses
-      },
-      images: {
-        create: [{ url: "https://example.com/images/dress1.jpg" }, { url: "https://example.com/images/dress2.jpg" }],
-      },
-    },
-  })
+  const getRandom = (arr: any[]) => arr[Math.floor(Math.random() * arr.length)]
 
-  console.log("Created products")
+  for (let i = 0; i < productData.length; i++) {
+    const p = productData[i]
+    const product = await prisma.product.create({
+      data: {
+        name: p.name,
+        description: `Produit unique : ${p.name}`,
+        price: p.price,
+        sellerId: sellers[i % sellers.length].id,
+        categoryId: p.category,
+        colorId: getRandom(colorData).id,
+        materialId: getRandom(materialData).id,
+        images: {
+          create: [{ url: `/seed-images/${p.image}` }]
+        }
+      }
+    })
 
-  // Create projects
-  const project1 = await prisma.project.create({
-    data: {
-      title: "Wedding Suit",
-      description: "Need a custom suit for my wedding in 3 months",
-      deadline: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000), // 90 days from now
-      clientId: client1.id,
-    },
-  })
+    await prisma.productStock.createMany({
+      data: sizeData.map(size => ({
+        productId: product.id,
+        sizeId: size.id,
+        quantity: Math.floor(Math.random() * 10) + 1
+      }))
+    })
+  }
 
-  const project2 = await prisma.project.create({
-    data: {
-      title: "Business Shirts",
-      description: "Looking for 5 custom business shirts",
-      deadline: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days from now
-      clientId: client2.id,
-    },
-  })
+  for (let i = 1; i <= 10; i++) {
+    await prisma.project.create({
+      data: {
+        title: `Projet ${i} - Création personnalisée`,
+        description: `Besoin spécifique pour un vêtement unique (${i}).`,
+        clientId: clients[i % clients.length].id,
+        images: [`https://example.com/projet${i}.jpg`]
+      }
+    })
+  }
 
-  console.log("Created projects")
+  for (let i = 1; i <= 10; i++) {
+    await prisma.advert.create({
+      data: {
+        title: `Annonce ${i} - Service couture`,
+        description: `Annonce ${i} pour proposer un service personnalisé.`,
+        price: 70 + (i * 10),
+        sellerId: sellers[i % sellers.length].id,
+      }
+    })
+  }
 
-  // Create adverts
-  const advert1 = await prisma.advert.create({
-    data: {
-      title: "Custom Suit Making",
-      description: "Professional tailor offering custom suit making services",
-      price: 500.0,
-      sellerId: seller1.id,
-    },
-  })
-
-  const advert2 = await prisma.advert.create({
-    data: {
-      title: "Dress Alterations",
-      description: "Expert dress alterations and customizations",
-      price: 150.0,
-      sellerId: seller2.id,
-    },
-  })
-
-  console.log("Created adverts")
-
-  // Create proposals
-  const proposal1 = await prisma.proposal.create({
-    data: {
-      price: 550.0,
-      message: "I can create a perfect wedding suit for you",
-      projectId: project1.id,
-      sellerId: seller1.id,
-      advertId: advert1.id,
-    },
-  })
-
-  const proposal2 = await prisma.proposal.create({
-    data: {
-      price: 400.0,
-      message: "I can make 5 high-quality business shirts",
-      projectId: project2.id,
-      sellerId: seller1.id,
-      advertId: advert1.id,
-    },
-  })
-
-  console.log("Created proposals")
-
-  // Create orders
-  const order1 = await prisma.order.create({
-    data: {
-      quantity: 1,
-      totalPrice: product1.price.toNumber(),
-      productId: product1.id,
-      clientId: client1.id,
-      sellerId: seller1.id,
-    },
-  })
-
-  const order2 = await prisma.order.create({
-    data: {
-      quantity: 2,
-      totalPrice: product3.price.toNumber() * 2,
-      productId: product3.id,
-      clientId: client2.id,
-      sellerId: seller2.id,
-    },
-  })
-
-  console.log("Created orders")
-
-  // Create messages
-  await prisma.message.create({
-    data: {
-      content: "Hello, I'm interested in your services",
-      senderId: clientUser1.id,
-      recipientId: sellerUser1.id,
-    },
-  })
-
-  await prisma.message.create({
-    data: {
-      content: "Thank you for your interest. How can I help you?",
-      senderId: sellerUser1.id,
-      recipientId: clientUser1.id,
-    },
-  })
-
-  console.log("Created messages")
-
-  // Create notifications
-  await prisma.notification.create({
-    data: {
-      content: "You have a new proposal for your project",
-      userId: clientUser1.id,
-    },
-  })
-
-  await prisma.notification.create({
-    data: {
-      content: "Your order has been shipped",
-      userId: clientUser2.id,
-    },
-  })
-
-  console.log("Created notifications")
-
-  console.log("Seed data created successfully")
+  console.log("✅ Base Wovely complétée avec 20 produits illustrés localement et variantes de taille.")
 }
 
 main()
-  .catch((e) => {
-    console.error(e)
-    process.exit(1)
-  })
-  .finally(async () => {
-    await prisma.$disconnect()
-  })
+    .catch((e) => {
+      console.error(e)
+      process.exit(1)
+    })
+    .finally(async () => {
+      await prisma.$disconnect()
+    })

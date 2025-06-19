@@ -45,6 +45,15 @@ export default function SellerProfile() {
               <button className="mt-4 bg-teal-600 text-white px-4 py-2 rounded-md text-sm hover:bg-teal-700 transition-colors">
                 Change Photo
               </button>
+
+              {user?.seller?.id && (
+                  <button
+                      onClick={() => window.open(`/tailor/${user.seller.id}`, "_blank")}
+                      className="m-4 bg-gray-200 text-gray-800 px-4 py-2 rounded-md text-sm hover:bg-gray-300 transition-colors"
+                  >
+                    Visualiser mon profil
+                  </button>
+              )}
             </div>
           </div>
 

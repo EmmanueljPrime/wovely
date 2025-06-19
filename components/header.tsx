@@ -208,19 +208,19 @@ export default function Header() {
                   </Button>
                   <div className="absolute hidden group-hover:block z-10 bg-white shadow-lg rounded-md p-2 min-w-40">
                     <Link
-                        href={session?.user?.role === "CLIENT" ? "/client/clothing/shirts" : "/clothing/shirts"}
+                        href="/?category=Robes"
                         className="block px-4 py-2 hover:bg-gray-100 rounded-md"
                     >
-                      Shirts
+                      Robes
                     </Link>
                     <Link
-                        href={session?.user?.role === "CLIENT" ? "/client/clothing/pants" : "/clothing/pants"}
+                        href="/?category=Pants"
                         className="block px-4 py-2 hover:bg-gray-100 rounded-md"
                     >
                       Pants
                     </Link>
                     <Link
-                        href={session?.user?.role === "CLIENT" ? "/client/clothing/jackets" : "/clothing/jackets"}
+                        href="/?category=Jackets"
                         className="block px-4 py-2 hover:bg-gray-100 rounded-md"
                     >
                       Jackets
@@ -233,47 +233,22 @@ export default function Header() {
                   </Button>
                   <div className="absolute hidden group-hover:block z-10 bg-white shadow-lg rounded-md p-2 min-w-40">
                     <Link
-                        href={session?.user?.role === "CLIENT" ? "/client/material/cotton" : "/material/cotton"}
+                        href="/?material=Cotton"
                         className="block px-4 py-2 hover:bg-gray-100 rounded-md"
                     >
                       Cotton
                     </Link>
                     <Link
-                        href={session?.user?.role === "CLIENT" ? "/client/wool" : "/material/wool"}
+                        href="/?material=Wool"
                         className="block px-4 py-2 hover:bg-gray-100 rounded-md"
                     >
                       Wool
                     </Link>
                     <Link
-                        href={session?.user?.role === "CLIENT" ? "/client/silk" : "/material/silk"}
+                        href="/?material=Silk"
                         className="block px-4 py-2 hover:bg-gray-100 rounded-md"
                     >
                       Silk
-                    </Link>
-                  </div>
-                </div>
-                <div className="relative group">
-                  <Button variant="ghost" className="flex items-center gap-1">
-                    Price <span className="text-xs">▼</span>
-                  </Button>
-                  <div className="absolute hidden group-hover:block z-10 bg-white shadow-lg rounded-md p-2 min-w-40">
-                    <Link
-                        href={session?.user?.role === "CLIENT" ? "/client/price/low" : "/price/low"}
-                        className="block px-4 py-2 hover:bg-gray-100 rounded-md"
-                    >
-                      $0 - $50
-                    </Link>
-                    <Link
-                        href={session?.user?.role === "CLIENT" ? "/client/price/medium" : "/price/medium"}
-                        className="block px-4 py-2 hover:bg-gray-100 rounded-md"
-                    >
-                      $50 - $100
-                    </Link>
-                    <Link
-                        href={session?.user?.role === "CLIENT" ? "/client/price/high" : "/price/high"}
-                        className="block px-4 py-2 hover:bg-gray-100 rounded-md"
-                    >
-                      $100+
                     </Link>
                   </div>
                 </div>
@@ -283,25 +258,25 @@ export default function Header() {
                   </Button>
                   <div className="absolute hidden group-hover:block z-10 bg-white shadow-lg rounded-md p-2 min-w-40">
                     <Link
-                        href={session?.user?.role === "CLIENT" ? "/client/size/s" : "/size/s"}
+                        href="/?size=S"
                         className="block px-4 py-2 hover:bg-gray-100 rounded-md"
                     >
                       S
                     </Link>
                     <Link
-                        href={session?.user?.role === "CLIENT" ? "/client/size/m" : "/size/m"}
+                        href="/?size=M"
                         className="block px-4 py-2 hover:bg-gray-100 rounded-md"
                     >
                       M
                     </Link>
                     <Link
-                        href={session?.user?.role === "CLIENT" ? "/client/size/l" : "/size/l"}
+                        href="/?size=L"
                         className="block px-4 py-2 hover:bg-gray-100 rounded-md"
                     >
                       L
                     </Link>
                     <Link
-                        href={session?.user?.role === "CLIENT" ? "/client/size/xl" : "/size/xl"}
+                        href="/?size=XL"
                         className="block px-4 py-2 hover:bg-gray-100 rounded-md"
                     >
                       XL
@@ -314,25 +289,25 @@ export default function Header() {
                   </Button>
                   <div className="absolute hidden group-hover:block z-10 bg-white shadow-lg rounded-md p-2 min-w-40">
                     <Link
-                        href={session?.user?.role === "CLIENT" ? "/client/color/black" : "/color/black"}
+                        href="/?color=Black"
                         className="block px-4 py-2 hover:bg-gray-100 rounded-md"
                     >
                       Black
                     </Link>
                     <Link
-                        href={session?.user?.role === "CLIENT" ? "/client/color/white" : "/color/white"}
+                        href="/?color=White"
                         className="block px-4 py-2 hover:bg-gray-100 rounded-md"
                     >
                       White
                     </Link>
                     <Link
-                        href={session?.user?.role === "CLIENT" ? "/client/color/blue" : "/color/blue"}
+                        href="/?color=Blue"
                         className="block px-4 py-2 hover:bg-gray-100 rounded-md"
                     >
                       Blue
                     </Link>
                     <Link
-                        href={session?.user?.role === "CLIENT" ? "/client/color/red" : "/color/red"}
+                        href="/?color=Red"
                         className="block px-4 py-2 hover:bg-gray-100 rounded-md"
                     >
                       Red

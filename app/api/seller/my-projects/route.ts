@@ -11,13 +11,18 @@ export async function GET(request: NextRequest) {
             return NextResponse.json({ error: "Non autorisé" }, { status: 401 })
         }
 
-        // Récupérer les projets où ce seller a une proposition acceptée
+        const sellerId = session.user.seller?.id
+        if (!sellerId) {
+            return NextResponse.json({ error: "ID du vendeur manquant" }, { status: 400 })
+        }
+
+        // Récupérer les projets liés à une proposition acceptée par ce vendeur
         const projects = await prisma.project.findMany({
             where: {
                 proposals: {
                     some: {
-                        sellerId: session.user.seller?.id,
-                        status: "ACCEPTED",
+                        sellerId: sellerId,
+                        status: "accepted",
                     },
                 },
             },
@@ -26,7 +31,7 @@ export async function GET(request: NextRequest) {
                     include: {
                         user: {
                             select: {
-                                name: true,
+                                username: true,
                                 email: true,
                             },
                         },
@@ -34,17 +39,17 @@ export async function GET(request: NextRequest) {
                 },
                 proposals: {
                     where: {
-                        sellerId: session.user.seller?.id,
-                        status: "ACCEPTED",
+                        sellerId: sellerId,
+                        status: "accepted",
                     },
                     select: {
                         price: true,
-                        acceptedAt: true,
+                        updated_at: true, // à défaut de acceptedAt qui n’existe pas
                     },
                 },
             },
             orderBy: {
-                updatedAt: "desc",
+                updated_at: "desc",
             },
         })
 
@@ -53,18 +58,23 @@ export async function GET(request: NextRequest) {
             id: project.id,
             title: project.title,
             description: project.description,
-            budget: project.budget,
             deadline: project.deadline,
             status: project.status,
-            createdAt: project.createdAt,
-            updatedAt: project.updatedAt,
-            client: project.client,
+            created_at: project.created_at,
+            updated_at: project.updated_at,
+            client: {
+                username: project.client.user.username,
+                email: project.client.user.email,
+            },
             acceptedProposal: project.proposals[0] || null,
         }))
 
         return NextResponse.json(formattedProjects)
     } catch (error) {
         console.error("Erreur lors de la récupération des projets:", error)
-        return NextResponse.json({ error: "Erreur lors de la récupération des projets" }, { status: 500 })
+        return NextResponse.json(
+            { error: "Erreur lors de la récupération des projets", detail: (error as Error).message },
+            { status: 500 }
+        )
     }
 }
