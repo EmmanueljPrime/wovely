@@ -15,7 +15,7 @@ export default function ConditionalLayout({ children }: ConditionalLayoutProps) 
     const pathname = usePathname()
 
     // Routes qui ne doivent jamais avoir de header/footer
-    const noLayoutRoutes = ["/auth/login", "/auth/register"]
+    const noLayoutRoutes = [""]
     const isNoLayoutRoute = noLayoutRoutes.includes(pathname)
 
     // Routes seller qui ont leur propre layout avec sidebar

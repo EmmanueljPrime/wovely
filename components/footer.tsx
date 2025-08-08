@@ -17,90 +17,64 @@ export default function Footer() {
             <h3 className="font-semibold mb-4">Quick Links</h3>
             <ul className="space-y-2">
               <li>
-                <Link href="#" className="text-gray-600 hover:text-gray-900">
-                  Universal checkout
+                <Link href="/" className="text-gray-600 hover:text-gray-900">
+                  Home
                 </Link>
               </li>
               <li>
-                <Link href="#" className="text-gray-600 hover:text-gray-900">
-                  Payment workflows
+                <Link href="/auth/login" className="text-gray-600 hover:text-gray-900">
+                  Login
                 </Link>
               </li>
               <li>
-                <Link href="#" className="text-gray-600 hover:text-gray-900">
-                  Observability
+                <Link href="/auth/register" className="text-gray-600 hover:text-gray-900">
+                  Register
                 </Link>
               </li>
               <li>
-                <Link href="#" className="text-gray-600 hover:text-gray-900">
-                  uplift.AI
+                <Link href="/contact" className="text-gray-600 hover:text-gray-900">
+                  Contact
                 </Link>
               </li>
               <li>
-                <Link href="#" className="text-gray-600 hover:text-gray-900">
-                  Apps & integrations
-                </Link>
-              </li>
-            </ul>
-          </div>
-
-          <div>
-            <h3 className="font-semibold mb-4">Resources</h3>
-            <ul className="space-y-2">
-              <li>
-                <Link href="#" className="text-gray-600 hover:text-gray-900">
-                  Blog
+                <Link href="/about" className="text-gray-600 hover:text-gray-900">
+                  About
                 </Link>
               </li>
               <li>
-                <Link href="#" className="text-gray-600 hover:text-gray-900">
-                  Success stories
-                </Link>
-              </li>
-              <li>
-                <Link href="#" className="text-gray-600 hover:text-gray-900">
-                  News room
-                </Link>
-              </li>
-              <li>
-                <Link href="#" className="text-gray-600 hover:text-gray-900">
-                  Terms
-                </Link>
-              </li>
-              <li>
-                <Link href="#" className="text-gray-600 hover:text-gray-900">
-                  Privacy
+                <Link href="/faq" className="text-gray-600 hover:text-gray-900">
+                  FAQ
                 </Link>
               </li>
             </ul>
           </div>
 
           <div>
-            <h3 className="font-semibold mb-4">Developers</h3>
+            <h3 className="font-semibold mb-4">Legal</h3>
             <ul className="space-y-2">
               <li>
-                <Link href="#" className="text-gray-600 hover:text-gray-900">
-                  Primer Docs
+                <Link href="/legal-notice" className="text-gray-600 hover:text-gray-900">
+                  Legal Notice
                 </Link>
               </li>
               <li>
-                <Link href="#" className="text-gray-600 hover:text-gray-900">
-                  API Reference
+                <Link href="/terms" className="text-gray-600 hover:text-gray-900">
+                  Terms of Service (CGU)
                 </Link>
               </li>
               <li>
-                <Link href="#" className="text-gray-600 hover:text-gray-900">
-                  Payment methods guide
+                <Link href="/cgv" className="text-gray-600 hover:text-gray-900">
+                  Terms and Conditions of Sale (CGV)
                 </Link>
               </li>
               <li>
-                <Link href="#" className="text-gray-600 hover:text-gray-900">
-                  Service status
+                <Link href="/privacy-policy" className="text-gray-600 hover:text-gray-900">
+                  Privacy Policy
                 </Link>
               </li>
               <li>
-                <Link href="#" className="text-gray-600 hover:text-gray-900">
-                  Community
+                <Link href="/cookies" className="text-gray-600 hover:text-gray-900">
+                  Cookie Management
                 </Link>
               </li>
             </ul>

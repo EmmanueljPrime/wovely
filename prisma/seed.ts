@@ -123,26 +123,26 @@ async function main() {
   }
 
   const productData = [
-    { name: "Veste Synthétique", image: "vestesyntetic.jpg", price: 89.99, category: 'cat-costumes' },
-    { name: "Polo Noir", image: "polonoir.jpg", price: 29.99, category: 'cat-accessoires' },
-    { name: "Veste Costume Gris", image: "vestecostumegris.jpg", price: 149.99, category: 'cat-costumes' },
-    { name: "Robe Jean", image: "robejean.jpg", price: 59.99, category: 'cat-robes' },
-    { name: "Poncho Laine", image: "poncholaine.jpg", price: 69.99, category: 'cat-accessoires' },
-    { name: "T-Shirt Blanc 1", image: "tshirtblanc1.jpg", price: 19.99, category: 'cat-tshirts' },
-    { name: "Veste Mouton", image: "vestemouton.jpg", price: 119.99, category: 'cat-costumes' },
-    { name: "Chemise Rouge et Blanche", image: "chemiserougeblanc.jpg", price: 39.99, category: 'cat-chemisiers' },
-    { name: "T-Shirt Blanc 5", image: "tshirtblanc5.jpg", price: 17.99, category: 'cat-tshirts' },
-    { name: "Veste Rouge", image: "vesterouge.jpg", price: 99.99, category: 'cat-costumes' },
-    { name: "T-Shirt Jaune", image: "tshirtjaune.jpg", price: 21.99, category: 'cat-tshirts' },
-    { name: "Veste Jean", image: "vestejean.jpg", price: 89.99, category: 'cat-costumes' },
-    { name: "Veste Dickies", image: "vestedickies.jpg", price: 109.99, category: 'cat-costumes' },
-    { name: "T-Shirt Blanc 3", image: "tshirtblanc3.jpg", price: 19.49, category: 'cat-tshirts' },
-    { name: "Pantalon Beige", image: "pantalonbeige.jpg", price: 49.99, category: 'cat-pantalons' },
-    { name: "T-Shirt Blanc 4", image: "tshirtblanc4.jpg", price: 18.99, category: 'cat-tshirts' },
-    { name: "Pull Laine Bleu", image: "pulllainebleu.jpg", price: 79.99, category: 'cat-pulls' },
-    { name: "Lot T-Shirt", image: "lottshirt.jpg", price: 39.99, category: 'cat-tshirts' },
-    { name: "Ensemble Jogging Jaune", image: "ensemblejoggingjaune.jpg", price: 89.99, category: 'cat-pantalons' },
-    { name: "T-Shirt Blanc 2", image: "tshirtblanc2.jpg", price: 17.99, category: 'cat-tshirts' },
+    { name: "Veste Synthétique", image: "vestesyntetic.webp", price: 89.99, category: 'cat-costumes', stock: [ { size: 'size-s', quantity: 5 }, { size: 'size-m', quantity: 3 }, { size: 'size-l', quantity: 2 } ] },
+    { name: "Polo Noir", image: "polonoir.webp", price: 29.99, category: 'cat-accessoires', stock: [ { size: 'size-s', quantity: 4 }, { size: 'size-m', quantity: 6 }, { size: 'size-l', quantity: 2 } ] },
+    { name: "Veste Costume Gris", image: "vestecostumegris.webp", price: 149.99, category: 'cat-costumes', stock: [ { size: 'size-m', quantity: 2 }, { size: 'size-l', quantity: 4 }, { size: 'size-xl', quantity: 1 } ] },
+    { name: "Robe Jean", image: "robejean.webp", price: 59.99, category: 'cat-robes', stock: [ { size: 'size-s', quantity: 3 }, { size: 'size-m', quantity: 2 } ] },
+    { name: "Poncho Laine", image: "poncholaine.webp", price: 69.99, category: 'cat-accessoires', stock: [ { size: 'size-m', quantity: 5 }, { size: 'size-l', quantity: 3 } ] },
+    { name: "T-Shirt Blanc 1", image: "tshirtblanc1.webp", price: 19.99, category: 'cat-tshirts', stock: [ { size: 'size-s', quantity: 7 }, { size: 'size-m', quantity: 5 }, { size: 'size-l', quantity: 2 } ] },
+    { name: "Veste Mouton", image: "vestemouton.webp", price: 119.99, category: 'cat-costumes', stock: [ { size: 'size-l', quantity: 2 }, { size: 'size-xl', quantity: 2 } ] },
+    { name: "Chemise Rouge et Blanche", image: "chemiserougeblanc.webp", price: 39.99, category: 'cat-chemisiers', stock: [ { size: 'size-s', quantity: 2 }, { size: 'size-m', quantity: 2 }, { size: 'size-l', quantity: 2 } ] },
+    { name: "T-Shirt Blanc 5", image: "tshirtblanc5.webp", price: 17.99, category: 'cat-tshirts', stock: [ { size: 'size-s', quantity: 4 }, { size: 'size-m', quantity: 4 } ] },
+    { name: "Veste Rouge", image: "vesterouge.webp", price: 99.99, category: 'cat-costumes', stock: [ { size: 'size-m', quantity: 2 }, { size: 'size-l', quantity: 2 } ] },
+    { name: "T-Shirt Jaune", image: "tshirtjaune.webp", price: 21.99, category: 'cat-tshirts', stock: [ { size: 'size-s', quantity: 3 }, { size: 'size-m', quantity: 3 }, { size: 'size-l', quantity: 3 } ] },
+    { name: "Veste Jean", image: "vestejean.webp", price: 89.99, category: 'cat-costumes', stock: [ { size: 'size-m', quantity: 2 }, { size: 'size-l', quantity: 2 } ] },
+    { name: "Veste Dickies", image: "vestedickies.webp", price: 109.99, category: 'cat-costumes', stock: [ { size: 'size-l', quantity: 2 }, { size: 'size-xl', quantity: 1 } ] },
+    { name: "T-Shirt Blanc 3", image: "tshirtblanc3.webp", price: 19.49, category: 'cat-tshirts', stock: [ { size: 'size-s', quantity: 5 }, { size: 'size-m', quantity: 5 } ] },
+    { name: "Pantalon Beige", image: "pantalonbeige.webp", price: 49.99, category: 'cat-pantalons', stock: [ { size: 'size-m', quantity: 2 }, { size: 'size-l', quantity: 2 } ] },
+    { name: "T-Shirt Blanc 4", image: "tshirtblanc4.webp", price: 18.99, category: 'cat-tshirts', stock: [ { size: 'size-s', quantity: 2 }, { size: 'size-m', quantity: 2 }, { size: 'size-l', quantity: 2 } ] },
+    { name: "Pull Laine Bleu", image: "pulllainebleu.webp", price: 79.99, category: 'cat-pulls', stock: [ { size: 'size-m', quantity: 2 }, { size: 'size-l', quantity: 2 } ] },
+    { name: "Lot T-Shirt", image: "lottshirt.webp", price: 39.99, category: 'cat-tshirts', stock: [ { size: 'size-s', quantity: 6 }, { size: 'size-m', quantity: 6 } ] },
+    { name: "Ensemble Jogging Jaune", image: "ensemblejoggingjaune.webp", price: 89.99, category: 'cat-pantalons', stock: [ { size: 'size-m', quantity: 2 }, { size: 'size-l', quantity: 2 } ] },
+    { name: "T-Shirt Blanc 2", image: "tshirtblanc2.webp", price: 17.99, category: 'cat-tshirts', stock: [ { size: 'size-s', quantity: 3 }, { size: 'size-m', quantity: 3 } ] },
   ]
 
   const getRandom = (arr: any[]) => arr[Math.floor(Math.random() * arr.length)]
@@ -165,10 +165,10 @@ async function main() {
     })
 
     await prisma.productStock.createMany({
-      data: sizeData.map(size => ({
+      data: p.stock.map((s: { size: string, quantity: number }) => ({
         productId: product.id,
-        sizeId: size.id,
-        quantity: Math.floor(Math.random() * 10) + 1
+        sizeId: s.size,
+        quantity: s.quantity
       }))
     })
   }

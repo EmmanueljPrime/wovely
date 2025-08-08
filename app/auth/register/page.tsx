@@ -871,6 +871,127 @@ export default function RegisterPage() {
                             </Select>
                           </div>
 
+                          {/* Ajout des champs légaux obligatoires */}
+                          <div>
+                            <label htmlFor="professional-siretNumber" className="block text-sm font-medium text-gray-700 mb-1">
+                              SIRET Number
+                            </label>
+                            <Input
+                              id="professional-siretNumber"
+                              name="siretNumber"
+                              type="text"
+                              required
+                              placeholder="123 456 789 00012"
+                              value={professionalTailorFormData.siretNumber}
+                              onChange={handleProfessionalTailorChange}
+                              disabled={isLoading}
+                            />
+                          </div>
+                          <div>
+                            <label htmlFor="professional-address" className="block text-sm font-medium text-gray-700 mb-1">
+                              Company Address
+                            </label>
+                            <Input
+                              id="professional-address"
+                              name="address"
+                              type="text"
+                              required
+                              placeholder="123 Main Street"
+                              value={professionalTailorFormData.address}
+                              onChange={handleProfessionalTailorChange}
+                              disabled={isLoading}
+                            />
+                          </div>
+                          <div>
+                            <label htmlFor="professional-postalCode" className="block text-sm font-medium text-gray-700 mb-1">
+                              Postal Code
+                            </label>
+                            <Input
+                              id="professional-postalCode"
+                              name="postalCode"
+                              type="text"
+                              required
+                              placeholder="75001"
+                              value={professionalTailorFormData.postalCode}
+                              onChange={handleProfessionalTailorChange}
+                              disabled={isLoading}
+                            />
+                          </div>
+                          <div>
+                            <label htmlFor="professional-city" className="block text-sm font-medium text-gray-700 mb-1">
+                              City
+                            </label>
+                            <Input
+                              id="professional-city"
+                              name="city"
+                              type="text"
+                              required
+                              placeholder="Paris"
+                              value={professionalTailorFormData.city}
+                              onChange={handleProfessionalTailorChange}
+                              disabled={isLoading}
+                            />
+                          </div>
+                          <div>
+                            <label htmlFor="professional-country" className="block text-sm font-medium text-gray-700 mb-1">
+                              Country
+                            </label>
+                            <Input
+                              id="professional-country"
+                              name="country"
+                              type="text"
+                              required
+                              placeholder="France"
+                              value={professionalTailorFormData.country}
+                              onChange={handleProfessionalTailorChange}
+                              disabled={isLoading}
+                            />
+                          </div>
+                          <div>
+                            <label htmlFor="professional-companyPhoneNumber" className="block text-sm font-medium text-gray-700 mb-1">
+                              Company Phone Number
+                            </label>
+                            <Input
+                              id="professional-companyPhoneNumber"
+                              name="companyPhoneNumber"
+                              type="tel"
+                              required
+                              placeholder="01 23 45 67 89"
+                              value={professionalTailorFormData.companyPhoneNumber}
+                              onChange={handleProfessionalTailorChange}
+                              disabled={isLoading}
+                            />
+                          </div>
+
+                          <div className="space-y-2">
+                            <div className="flex items-center">
+                              <Checkbox
+                                id="professional-agreeTerms"
+                                checked={professionalTailorFormData.agreeTerms}
+                                onCheckedChange={(checked) =>
+                                  handleProfessionalTailorCheckboxChange("agreeTerms", checked as boolean)
+                                }
+                                disabled={isLoading}
+                              />
+                              <label htmlFor="professional-agreeTerms" className="ml-2 block text-sm text-gray-900">
+                                I agree to the terms and conditions
+                              </label>
+                            </div>
+                            <div className="flex items-center">
+                              <Checkbox
+                                id="professional-receiveAlerts"
+                                checked={professionalTailorFormData.receiveAlerts}
+                                onCheckedChange={(checked) =>
+                                  handleProfessionalTailorCheckboxChange("receiveAlerts", checked as boolean)
+                                }
+                                disabled={isLoading}
+                              />
+                              <label htmlFor="professional-receiveAlerts" className="ml-2 block text-sm text-gray-900">
+                                Send me the latest deal alerts
+                              </label>
+                            </div>
+                          </div>
+
                           <Button type="submit" className="w-full bg-black hover:bg-gray-800" disabled={isLoading}>
                             {isLoading ? "Inscription en cours..." : "Create account"}
                           </Button>
