@@ -1,6 +1,7 @@
 import {prisma} from "@/lib/prisma";
 import Image from "next/image";
 import Link from "next/link";
+import { User } from "lucide-react";
 
 interface TailorPageProps {
   searchParams: {
@@ -157,13 +158,17 @@ export default async function TailorListPage({ searchParams }: TailorPageProps) 
               className="group relative block rounded-lg transition-transform hover:scale-105"
             >
               <div className="relative aspect-square overflow-hidden rounded-lg bg-gray-100 flex items-center justify-center">
-                <Image
-                  src={seller.user.image || "/placeholder-user.jpg"}
-                  alt={seller.business_name}
-                  width={200}
-                  height={200}
-                  className="object-cover w-full h-full rounded-lg"
-                />
+                {seller.user.image ? (
+                  <Image
+                    src={seller.user.image}
+                    alt={seller.business_name}
+                    width={200}
+                    height={200}
+                    className="object-cover w-full h-full rounded-lg"
+                  />
+                ) : (
+                  <User className="w-16 h-16 text-gray-400" />
+                )}
               </div>
               <div className="mt-2">
                 <h3 className="text-sm font-medium">{seller.business_name}</h3>

@@ -174,6 +174,15 @@ export default function SellerSidebar() {
                     All Catalogs
                   </Link>
                   <Link
+                      href="/seller/catalogs/create"
+                      className={cn(
+                          "block px-4 py-2 text-sm rounded-md transition-colors",
+                          isActive("/seller/catalogs/create") ? "text-teal-600 font-medium" : "text-gray-600 hover:bg-gray-100",
+                      )}
+                  >
+                    Créer un produit
+                  </Link>
+                  <Link
                       href="/seller/catalogs/new"
                       className={cn(
                           "block px-4 py-2 text-sm rounded-md transition-colors",
