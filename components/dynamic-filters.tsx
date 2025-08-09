@@ -4,10 +4,22 @@ import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { useFilters } from "@/hooks/use-filters"
 import { cn } from "@/lib/utils"
+import { useState, useEffect } from "react"
 
 interface FilterOption {
   label: string
   value: string
+}
+
+interface FilterData {
+  categories?: FilterOption[]
+  materials?: FilterOption[]
+  sizes?: FilterOption[]
+  colors?: FilterOption[]
+  services?: FilterOption[]
+  experiences?: FilterOption[]
+  types?: FilterOption[]
+  cities?: FilterOption[]
 }
 
 interface FilterDropdownProps {
@@ -19,6 +31,8 @@ interface FilterDropdownProps {
 
 function FilterDropdown({ title, filterKey, options, className }: FilterDropdownProps) {
   const { filters, updateFilter, isFilterActive } = useFilters()
+
+  if (options.length === 0) return null
 
   return (
     <div className={cn("relative group", className)}>
@@ -65,101 +79,72 @@ interface DynamicFiltersProps {
 
 export function DynamicFilters({ type }: DynamicFiltersProps) {
   const { filters, clearFilters, isLoading } = useFilters()
+  const [filterData, setFilterData] = useState<FilterData>({})
+  const [dataLoading, setDataLoading] = useState(true)
+
+  useEffect(() => {
+    const fetchFilterData = async () => {
+      try {
+        const endpoint = type === 'products' ? '/api/filters/products' : '/api/filters/tailors'
+        const response = await fetch(endpoint)
+        const data = await response.json()
+        setFilterData(data)
+      } catch (error) {
+        console.error('Erreur lors du chargement des filtres:', error)
+      } finally {
+        setDataLoading(false)
+      }
+    }
+
+    fetchFilterData()
+  }, [type])
 
   const productFilters = [
     {
-      title: "Clothing",
+      title: "Catégorie",
       filterKey: "category",
-      options: [
-        { label: "Robes", value: "Robes" },
-        { label: "Pants", value: "Pants" },
-        { label: "Jackets", value: "Jackets" },
-        { label: "Shirts", value: "Shirts" },
-        { label: "Dresses", value: "Dresses" }
-      ]
+      options: filterData.categories || []
     },
     {
-      title: "Material",
+      title: "Matériau",
       filterKey: "material",
-      options: [
-        { label: "Cotton", value: "Cotton" },
-        { label: "Wool", value: "Wool" },
-        { label: "Silk", value: "Silk" },
-        { label: "Linen", value: "Linen" },
-        { label: "Polyester", value: "Polyester" }
-      ]
+      options: filterData.materials || []
     },
     {
-      title: "Size",
+      title: "Taille",
       filterKey: "size",
-      options: [
-        { label: "XS", value: "XS" },
-        { label: "S", value: "S" },
-        { label: "M", value: "M" },
-        { label: "L", value: "L" },
-        { label: "XL", value: "XL" },
-        { label: "XXL", value: "XXL" }
-      ]
+      options: filterData.sizes || []
     },
     {
-      title: "Color",
+      title: "Couleur",
       filterKey: "color",
-      options: [
-        { label: "Black", value: "Black" },
-        { label: "White", value: "White" },
-        { label: "Blue", value: "Blue" },
-        { label: "Red", value: "Red" },
-        { label: "Green", value: "Green" },
-        { label: "Gray", value: "Gray" }
-      ]
+      options: filterData.colors || []
     }
   ]
 
   const tailorFilters = [
     {
-      title: "Services",
-      filterKey: "services",
-      options: [
-        { label: "Alterations", value: "alterations" },
-        { label: "Custom Clothing", value: "custom" },
-        { label: "Repairs", value: "repairs" },
-        { label: "All Services", value: "all" }
-      ]
-    },
-    {
-      title: "Experience",
-      filterKey: "experience",
-      options: [
-        { label: "1-3 years", value: "1-3" },
-        { label: "3-5 years", value: "3-5" },
-        { label: "5-10 years", value: "5-10" },
-        { label: "10+ years", value: "10+" }
-      ]
-    },
-    {
       title: "Type",
       filterKey: "type",
-      options: [
-        { label: "Individual", value: "individual" },
-        { label: "Professional", value: "professional" }
-      ]
-    },
-    {
-      title: "Location",
-      filterKey: "city",
-      options: [
-        { label: "Paris", value: "Paris" },
-        { label: "Lyon", value: "Lyon" },
-        { label: "Marseille", value: "Marseille" },
-        { label: "Toulouse", value: "Toulouse" },
-        { label: "Nice", value: "Nice" },
-        { label: "Nantes", value: "Nantes" }
-      ]
+      options: filterData.types || []
     }
   ]
 
   const currentFilters = type === 'products' ? productFilters : tailorFilters
   const hasActiveFilters = Object.keys(filters).length > 0
+
+  if (dataLoading) {
+    return (
+      <div className="flex items-center justify-between w-full">
+        <div className="flex space-x-4 items-center">
+          <div className="h-8 w-20 bg-gray-200 animate-pulse rounded"></div>
+          <div className="h-8 w-20 bg-gray-200 animate-pulse rounded"></div>
+          <div className="h-8 w-20 bg-gray-200 animate-pulse rounded"></div>
+          <div className="h-8 w-20 bg-gray-200 animate-pulse rounded"></div>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="flex items-center justify-between w-full">
@@ -184,7 +169,7 @@ export function DynamicFilters({ type }: DynamicFiltersProps) {
             onClick={clearFilters}
             className="text-red-600 border-red-200 hover:bg-red-50"
           >
-            Clear Filters
+            Effacer les filtres
           </Button>
         )}
       </div>
@@ -195,7 +180,7 @@ export function DynamicFilters({ type }: DynamicFiltersProps) {
             variant={type === 'products' ? 'default' : 'outline'}
             className="rounded-full"
           >
-            Search Product
+            Rechercher des produits
           </Button>
         </Link>
         <Link href="/tailor">
@@ -203,7 +188,7 @@ export function DynamicFilters({ type }: DynamicFiltersProps) {
             variant={type === 'tailors' ? 'default' : 'outline'}
             className="rounded-full"
           >
-            Search Tailor
+            Rechercher des tailleurs
           </Button>
         </Link>
       </div>
