@@ -316,12 +316,16 @@ export default function Header() {
                         </div>
                     </div>
                     <div className="flex space-x-2">
-                        <Button className="rounded-full bg-white text-black border border-gray-300 hover:bg-gray-100">
-                            Search Product
-                        </Button>
-                        <Button className="rounded-full bg-white text-black border border-gray-300 hover:bg-gray-100">
-                            Search Tailor
-                        </Button>
+                        <Link href="/">
+                            <Button className="rounded-full bg-white text-black border border-gray-300 hover:bg-gray-100">
+                                Search Product
+                            </Button>
+                        </Link>
+                        <Link href="/tailor">
+                            <Button className="rounded-full bg-white text-black border border-gray-300 hover:bg-gray-100">
+                                Search Tailor
+                            </Button>
+                        </Link>
                     </div>
                 </div>
             )}
