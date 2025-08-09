@@ -3,6 +3,26 @@
 import { useRequireRole } from "@/hooks/use-auth"
 import { useState, useEffect } from "react"
 import ProjectModal from "@/components/project-modal"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Textarea } from "@/components/ui/textarea"
+import { Label } from "@/components/ui/label"
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import {
+  FolderOpen,
+  Search,
+  RefreshCw,
+  Eye,
+  Send,
+  User,
+  MapPin,
+  Calendar,
+  MessageSquare,
+  Euro,
+  Clock,
+  Filter
+} from "lucide-react"
+import { useToast } from "@/hooks/use-toast"
 
 export default function SellerProjects() {
   const { user, isLoading, hasCorrectRole } = useRequireRole("SELLER")
@@ -12,9 +32,18 @@ export default function SellerProjects() {
   const [searchTerm, setSearchTerm] = useState("")
   const [selectedProject, setSelectedProject] = useState<any>(null)
   const [modalOpen, setModalOpen] = useState(false)
+  const [proposalModalOpen, setProposalModalOpen] = useState(false)
+  const [submittingProposal, setSubmittingProposal] = useState(false)
+  const { toast } = useToast()
+
+  // Form states for new proposal
+  const [newProposal, setNewProposal] = useState({
+    price: "",
+    message: "",
+    deliveryTime: "",
+  })
 
   useEffect(() => {
-    console.log("Rôle détecté :", user?.role)
     if (hasCorrectRole) {
       fetchAvailableProjects()
     }
@@ -25,23 +54,63 @@ export default function SellerProjects() {
     setModalOpen(true)
   }
 
+  const handleOpenProposalModal = (project: any) => {
+    setSelectedProject(project)
+    setProposalModalOpen(true)
+  }
+
   const fetchAvailableProjects = async () => {
     try {
       setLoading(true)
-      console.log("📡 Appel API /api/projects/available")
       const response = await fetch("/api/projects/available")
       if (response.ok) {
         const data = await response.json()
-        console.log("✅ Projets récupérés :", data)
         setProjects(data)
       } else {
-        const error = await response.json()
-        console.error("❌ Erreur de réponse API :", error)
+        console.error("Erreur lors du chargement des projets")
       }
     } catch (error) {
-      console.error("🔥 Erreur lors du chargement des projets :", error)
+      console.error("Erreur lors du chargement des projets :", error)
     } finally {
       setLoading(false)
+    }
+  }
+
+  const handleSubmitProposal = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setSubmittingProposal(true)
+
+    try {
+      const response = await fetch(`/api/seller/projects/${selectedProject.id}/proposal`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          ...newProposal,
+          price: parseFloat(newProposal.price),
+        }),
+      })
+
+      if (response.ok) {
+        toast({
+          title: "Offre envoyée !",
+          description: "Votre proposition a été envoyée au client avec succès.",
+        })
+        setProposalModalOpen(false)
+        setNewProposal({ price: "", message: "", deliveryTime: "" })
+        fetchAvailableProjects() // Refresh projects
+      } else {
+        throw new Error("Erreur lors de l'envoi de l'offre")
+      }
+    } catch (error) {
+      toast({
+        title: "Erreur",
+        description: "Impossible d'envoyer l'offre. Veuillez réessayer.",
+        variant: "destructive",
+      })
+    } finally {
+      setSubmittingProposal(false)
     }
   }
 
@@ -66,8 +135,6 @@ export default function SellerProjects() {
     return matchesFilter && matchesSearch
   })
 
-  console.log("🎯 Projets après filtrage :", filteredProjects)
-
   const getStatusBadge = (status: string) => {
     const statusStyles = {
       open: "bg-green-100 text-green-800",
@@ -78,138 +145,297 @@ export default function SellerProjects() {
     return statusStyles[status as keyof typeof statusStyles] || statusStyles.open
   }
 
-  const handleSubmitProposal = async (projectId: number) => {
-    window.location.href = `/seller/projects/${projectId}/proposal`
-  }
+  const categories = ["all", "suits", "dresses", "alterations"]
 
   return (
-      <div className="p-6">
-        <div className="mb-6">
-          <h1 className="text-2xl font-bold text-gray-900">Projets Disponibles</h1>
-          <p className="text-gray-600">Découvrez les projets proposés par les clients et déposez vos offres</p>
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-white">
+      {/* Hero Section */}
+      <div className="bg-gradient-to-r from-teal-600 to-teal-700 text-white py-12">
+        <div className="container mx-auto px-4">
+          <div className="flex items-center gap-6">
+            <div className="bg-white/20 p-4 rounded-full">
+              <FolderOpen className="h-12 w-12" />
+            </div>
+            <div>
+              <h1 className="text-3xl font-bold mb-2">Projets Disponibles</h1>
+              <p className="text-teal-100 text-lg">
+                Découvrez les projets proposés par les clients et déposez vos offres
+              </p>
+            </div>
+          </div>
         </div>
+      </div>
 
-        <div className="mb-6 flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center">
-          <div className="flex flex-wrap gap-2">
-            {["all", "suits", "dresses", "alterations"].map((cat) => (
-                <button
+      <div className="container mx-auto px-4 py-8">
+        {/* Filters & Search */}
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-8 -mt-6 relative z-10">
+          <div className="flex flex-col lg:flex-row gap-6 items-start lg:items-center justify-between">
+            {/* Categories Filter */}
+            <div className="flex items-center gap-4">
+              <Filter className="h-5 w-5 text-teal-600" />
+              <div className="flex flex-wrap gap-2">
+                {categories.map((cat) => (
+                  <button
                     key={cat}
                     onClick={() => setSelectedFilter(cat)}
-                    className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-                        selectedFilter === cat
-                            ? "bg-teal-600 text-white"
-                            : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                      selectedFilter === cat
+                        ? "bg-teal-600 text-white shadow-sm"
+                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                     }`}
-                >
-                  {cat === "all" ? "Tous les projets" : cat.charAt(0).toUpperCase() + cat.slice(1)}
-                </button>
-            ))}
-          </div>
+                  >
+                    {cat === "all" ? "Tous les projets" : cat.charAt(0).toUpperCase() + cat.slice(1)}
+                  </button>
+                ))}
+              </div>
+            </div>
 
-          <div className="flex gap-2">
-            <input
-                type="search"
-                placeholder="Rechercher des projets..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="border border-gray-300 rounded-md px-3 py-2 text-sm w-64"
-            />
-            <button
+            {/* Search & Refresh */}
+            <div className="flex gap-3">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <Input
+                  type="search"
+                  placeholder="Rechercher des projets..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10 w-64 h-10 rounded-lg border-gray-200 focus:border-teal-500 focus:ring-teal-500"
+                />
+              </div>
+              <Button
                 onClick={fetchAvailableProjects}
-                className="bg-gray-100 text-gray-700 px-3 py-2 rounded-md text-sm hover:bg-gray-200 transition-colors"
-            >
-              Actualiser
-            </button>
+                variant="outline"
+                size="sm"
+                className="h-10"
+              >
+                <RefreshCw className="h-4 w-4 mr-2" />
+                Actualiser
+              </Button>
+            </div>
           </div>
         </div>
 
+        {/* Projects List */}
         {loading ? (
-            <div className="flex items-center justify-center py-12">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-teal-600"></div>
-              <span className="ml-3 text-gray-600">Chargement des projets...</span>
-            </div>
+          <div className="text-center py-12">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-teal-600 mx-auto mb-4"></div>
+            <p className="text-gray-600">Chargement des projets...</p>
+          </div>
         ) : filteredProjects.length > 0 ? (
-            <div className="space-y-6">
-              {filteredProjects.map((project: any) => (
-                  <div key={project.id} className="bg-white rounded-lg shadow border border-gray-200 p-6">
-                    <div className="flex justify-between items-start mb-4">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-3 mb-2">
-                          <h3 className="text-lg font-semibold text-gray-900">{project.title}</h3>
-                          <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusBadge(project.status)}`}>
-                      {project.status === "open" ? "Ouvert" : project.status}
-                    </span>
-                        </div>
-                        <p className="text-gray-600 mb-3">{project.description}</p>
-                        <div className="flex flex-wrap gap-4 text-sm text-gray-500">
-                          <span className="flex items-center gap-1">👤 {project.client?.name || "Client anonyme"}</span>
-                          {project.location && <span className="flex items-center gap-1">📍 {project.location}</span>}
-                          {project.deadline && (
-                              <span className="flex items-center gap-1">
-                        🗓 Deadline: {new Date(project.deadline).toLocaleDateString("fr-FR")}
-                      </span>
-                          )}
-                          <span className="flex items-center gap-1">📨 {project._count?.proposals || 0} offre(s)</span>
-                        </div>
+          <div className="space-y-6">
+            {filteredProjects.map((project: any) => (
+              <div
+                key={project.id}
+                className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 hover:shadow-md transition-shadow relative"
+              >
+                {/* Actions - positioned absolutely */}
+                <div className="absolute top-6 right-6 flex flex-col gap-3 w-48">
+                  <Button
+                    onClick={() => handleViewDetails(project)}
+                    variant="outline"
+                    className="w-full"
+                  >
+                    <Eye className="h-4 w-4 mr-2" />
+                    Voir détails
+                  </Button>
+                  <Button
+                    onClick={() => handleOpenProposalModal(project)}
+                    className="w-full bg-teal-600 hover:bg-teal-700"
+                  >
+                    <Send className="h-4 w-4 mr-2" />
+                    Déposer une offre
+                  </Button>
+                </div>
+
+                <div className="pr-80"> {/* Add right padding to avoid button overlap */}
+                  {/* Project Content */}
+                  <div className="flex-1">
+                    <div className="flex items-start justify-between mb-4">
+                      <div className="flex items-center gap-3">
+                        <h3 className="text-2xl font-bold text-gray-900">{project.title}</h3>
+                        <span className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusBadge(project.status)}`}>
+                          {project.status === "open" ? "Ouvert" : project.status}
+                        </span>
                       </div>
-                      <div className="text-right ml-6">
-                        {project.budget && <div className="text-lg font-semibold text-teal-600 mb-2">{project.budget}</div>}
-                        {project.category && (
-                            <span className="inline-block bg-gray-100 text-gray-700 px-2 py-1 rounded text-xs">
-                      {project.category}
-                    </span>
-                        )}
+                      {project.budget && (
+                        <div className="text-2xl font-bold text-teal-600">{project.budget}</div>
+                      )}
+                    </div>
+
+                    <p className="text-gray-600 mb-6 leading-relaxed">
+                      {project.description?.length > 30
+                        ? `${project.description.substring(0, 30)}...`
+                        : project.description}
+                    </p>
+
+                    {/* Project Meta */}
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                      <div className="flex items-center gap-2 text-sm text-gray-600">
+                        <User className="h-4 w-4 text-teal-600" />
+                        <span>{project.client?.name || "Client anonyme"}</span>
+                      </div>
+                      {project.location && (
+                        <div className="flex items-center gap-2 text-sm text-gray-600">
+                          <MapPin className="h-4 w-4 text-teal-600" />
+                          <span>{project.location}</span>
+                        </div>
+                      )}
+                      {project.deadline && (
+                        <div className="flex items-center gap-2 text-sm text-gray-600">
+                          <Calendar className="h-4 w-4 text-teal-600" />
+                          <span>{new Date(project.deadline).toLocaleDateString("fr-FR")}</span>
+                        </div>
+                      )}
+                      <div className="flex items-center gap-2 text-sm text-gray-600">
+                        <MessageSquare className="h-4 w-4 text-teal-600" />
+                        <span>{project._count?.proposals || 0} offre(s)</span>
                       </div>
                     </div>
 
-                    <div className="flex justify-between items-center pt-4 border-t border-gray-200">
-                <span className="text-sm text-gray-500">
-                  Publié le {new Date(project.createdAt).toLocaleDateString("fr-FR")}
-                </span>
-                      <div className="flex gap-2">
-                        <button
-                            onClick={() => handleViewDetails(project)}
-                            className="bg-gray-100 text-gray-700 px-4 py-2 rounded-md text-sm hover:bg-gray-200 transition-colors"
-                        >
-                          Voir détails
-                        </button>
-                        <button
-                            onClick={() => handleSubmitProposal(project.id)}
-                            className="bg-teal-600 text-white px-4 py-2 rounded-md text-sm hover:bg-teal-700 transition-colors"
-                        >
-                          Déposer une offre
-                        </button>
+                    {/* Category & Date */}
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        {project.category && (
+                          <span className="bg-teal-50 text-teal-700 px-3 py-1 rounded-lg text-sm font-medium">
+                            {project.category}
+                          </span>
+                        )}
+                        <span className="text-sm text-gray-500 flex items-center gap-1">
+                          <Clock className="h-4 w-4" />
+                          Publié le {new Date(project.createdAt).toLocaleDateString("fr-FR")}
+                        </span>
                       </div>
                     </div>
                   </div>
-              ))}
-            </div>
+                </div>
+              </div>
+            ))}
+          </div>
         ) : (
-            <div className="bg-white rounded-lg shadow p-12 text-center">
-              <p className="text-lg font-medium text-gray-900 mb-2">Aucun projet disponible</p>
-              <p className="text-gray-500 mb-4">
+          <div className="text-center py-16">
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-12 max-w-md mx-auto">
+              <FolderOpen className="h-16 w-16 text-gray-300 mx-auto mb-6" />
+              <h3 className="text-xl font-semibold text-gray-900 mb-3">Aucun projet disponible</h3>
+              <p className="text-gray-600 mb-6">
                 {searchTerm || selectedFilter !== "all"
-                    ? "Aucun projet ne correspond à vos critères de recherche."
-                    : "Aucun projet n'a été publié par les clients pour le moment."}
+                  ? "Aucun projet ne correspond à vos critères de recherche."
+                  : "Aucun projet n'a été publié par les clients pour le moment."}
               </p>
               {(searchTerm || selectedFilter !== "all") && (
-                  <button
-                      onClick={() => {
-                        setSearchTerm("")
-                        setSelectedFilter("all")
-                      }}
-                      className="bg-teal-600 text-white px-4 py-2 rounded-md text-sm hover:bg-teal-700 transition-colors"
-                  >
-                    Voir tous les projets
-                  </button>
+                <Button
+                  onClick={() => {
+                    setSearchTerm("")
+                    setSelectedFilter("all")
+                  }}
+                  className="bg-teal-600 hover:bg-teal-700"
+                >
+                  Voir tous les projets
+                </Button>
               )}
             </div>
+          </div>
         )}
-        <ProjectModal
-            open={modalOpen}
-            onClose={() => setModalOpen(false)}
-            project={selectedProject}
-        />
       </div>
+
+      {/* Project Details Modal */}
+      <ProjectModal
+        open={modalOpen}
+        onClose={() => setModalOpen(false)}
+        project={selectedProject}
+      />
+
+      {/* Submit Proposal Modal */}
+      <Dialog open={proposalModalOpen} onOpenChange={setProposalModalOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-3 text-2xl">
+              <Send className="h-6 w-6 text-teal-600" />
+              Déposer une offre
+            </DialogTitle>
+            <p className="text-gray-600">
+              Projet : <strong>{selectedProject?.title}</strong>
+            </p>
+          </DialogHeader>
+
+          <form onSubmit={handleSubmitProposal} className="space-y-6 pt-4">
+            <div>
+              <Label htmlFor="price" className="text-sm font-medium text-gray-700 flex items-center gap-2">
+                <Euro className="h-4 w-4 text-teal-600" />
+                Prix proposé (€) *
+              </Label>
+              <Input
+                id="price"
+                type="number"
+                step="0.01"
+                value={newProposal.price}
+                onChange={(e) => setNewProposal(prev => ({ ...prev, price: e.target.value }))}
+                placeholder="Ex: 250.00"
+                className="mt-2 h-12 rounded-lg border-gray-200 focus:border-teal-500 focus:ring-teal-500"
+                required
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="deliveryTime" className="text-sm font-medium text-gray-700 flex items-center gap-2">
+                <Clock className="h-4 w-4 text-teal-600" />
+                Délai de livraison
+              </Label>
+              <Input
+                id="deliveryTime"
+                value={newProposal.deliveryTime}
+                onChange={(e) => setNewProposal(prev => ({ ...prev, deliveryTime: e.target.value }))}
+                placeholder="Ex: 2 semaines, 10 jours..."
+                className="mt-2 h-12 rounded-lg border-gray-200 focus:border-teal-500 focus:ring-teal-500"
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="message" className="text-sm font-medium text-gray-700 flex items-center gap-2">
+                <MessageSquare className="h-4 w-4 text-teal-600" />
+                Message pour le client *
+              </Label>
+              <Textarea
+                id="message"
+                value={newProposal.message}
+                onChange={(e) => setNewProposal(prev => ({ ...prev, message: e.target.value }))}
+                placeholder="Présentez-vous, expliquez votre approche, votre expérience dans ce domaine..."
+                rows={6}
+                className="mt-2 rounded-lg border-gray-200 focus:border-teal-500 focus:ring-teal-500 resize-none"
+                required
+              />
+            </div>
+
+            <div className="flex gap-3 pt-4">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setProposalModalOpen(false)}
+                className="flex-1"
+                disabled={submittingProposal}
+              >
+                Annuler
+              </Button>
+              <Button
+                type="submit"
+                className="flex-1 bg-teal-600 hover:bg-teal-700"
+                disabled={submittingProposal}
+              >
+                {submittingProposal ? (
+                  <div className="flex items-center gap-2">
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                    Envoi en cours...
+                  </div>
+                ) : (
+                  <>
+                    <Send className="h-4 w-4 mr-2" />
+                    Envoyer l'offre
+                  </>
+                )}
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
+    </div>
   )
 }

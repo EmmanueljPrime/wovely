@@ -61,6 +61,7 @@ export default function RegisterPage() {
     postalCode: "",
     country: "",
     companyPhoneNumber: "",
+    servicesOffered: "",
     agreeTerms: false,
     receiveAlerts: false,
   })
@@ -252,8 +253,8 @@ export default function RegisterPage() {
           password: professionalTailorFormData.password,
           role: "SELLER",
           business_name: professionalTailorFormData.companyName,
-          firstName: professionalTailorFormData.firstName,
-          lastName: professionalTailorFormData.lastName,
+          fullName: `${professionalTailorFormData.firstName} ${professionalTailorFormData.lastName}`.trim(),
+          servicesOffered: professionalTailorFormData.servicesOffered,
           companyType: professionalTailorFormData.companyType,
           siretNumber: professionalTailorFormData.siretNumber,
           companyAddress: professionalTailorFormData.address,
@@ -961,6 +962,29 @@ export default function RegisterPage() {
                               onChange={handleProfessionalTailorChange}
                               disabled={isLoading}
                             />
+                          </div>
+
+                          <div>
+                            <label htmlFor="professional-servicesOffered" className="block text-sm font-medium text-gray-700 mb-1">
+                              Services Offered
+                            </label>
+                            <Select
+                              value={professionalTailorFormData.servicesOffered}
+                              onValueChange={(value) =>
+                                setProfessionalTailorFormData((prev) => ({ ...prev, servicesOffered: value }))
+                              }
+                              disabled={isLoading}
+                            >
+                              <SelectTrigger>
+                                <SelectValue placeholder="Tailoring services you offer" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="alterations">Alterations</SelectItem>
+                                <SelectItem value="custom">Custom Clothing</SelectItem>
+                                <SelectItem value="repairs">Repairs</SelectItem>
+                                <SelectItem value="all">All Services</SelectItem>
+                              </SelectContent>
+                            </Select>
                           </div>
 
                           <div className="space-y-2">

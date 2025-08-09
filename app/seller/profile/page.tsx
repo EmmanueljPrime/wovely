@@ -2,6 +2,25 @@
 
 import { useRequireRole } from "@/hooks/use-auth"
 import { useState } from "react"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Textarea } from "@/components/ui/textarea"
+import { Label } from "@/components/ui/label"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import {
+  User,
+  Building2,
+  Mail,
+  Phone,
+  MapPin, 
+  Clock,
+  Settings,
+  Edit3,
+  Save,
+  X,
+  Eye,
+  Camera
+} from "lucide-react"
 
 export default function SellerProfile() {
   const { user, isLoading, hasCorrectRole } = useRequireRole("SELLER")
@@ -20,177 +39,271 @@ export default function SellerProfile() {
   }
 
   return (
-      <div className="p-6">
-        <div className="mb-6">
-          <h1 className="text-2xl font-bold text-gray-900">Profile</h1>
-          <p className="text-gray-600">Manage your seller profile and business information</p>
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-white">
+      {/* Hero Section */}
+      <div className="bg-gradient-to-r from-teal-600 to-teal-700 text-white py-12">
+        <div className="container mx-auto px-4">
+          <div className="flex items-center gap-6">
+            <div className="bg-white/20 p-4 rounded-full">
+              <Settings className="h-12 w-12" />
+            </div>
+            <div>
+              <h1 className="text-3xl font-bold mb-2">Profil Vendeur</h1>
+              <p className="text-teal-100 text-lg">
+                Gérez vos informations professionnelles et paramètres
+              </p>
+            </div>
+          </div>
         </div>
+      </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Profile Picture Section */}
-          <div className="bg-white rounded-lg shadow p-6">
-            <div className="text-center">
-              <div className="w-24 h-24 bg-gray-300 rounded-full mx-auto mb-4 flex items-center justify-center">
-                <svg className="w-12 h-12 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-                  ></path>
-                </svg>
-              </div>
-              <h3 className="text-lg font-medium text-gray-900">{user?.name}</h3>
-              <p className="text-gray-600">{user?.seller?.business_name}</p>
-              <button className="mt-4 bg-teal-600 text-white px-4 py-2 rounded-md text-sm hover:bg-teal-700 transition-colors">
-                Change Photo
+      <div className="container mx-auto px-4 py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Profile Picture & Quick Info */}
+          <div className="space-y-6">
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 -mt-6 relative z-10">
+              {/* Camera button in top right corner */}
+              <button className="absolute top-4 right-4 bg-teal-600 text-white p-2 rounded-full hover:bg-teal-700 transition-colors">
+                <Camera className="h-4 w-4" />
               </button>
 
-              {user?.seller?.id && (
-                  <button
-                      onClick={() => window.open(`/tailor/${user.seller.id}`, "_blank")}
-                      className="m-4 bg-gray-200 text-gray-800 px-4 py-2 rounded-md text-sm hover:bg-gray-300 transition-colors"
+              <div className="text-center">
+                <div className="w-24 h-24 bg-gradient-to-br from-teal-100 to-teal-200 rounded-full mx-auto mb-4 flex items-center justify-center">
+                  <User className="w-12 h-12 text-teal-600" />
+                </div>
+
+                <h3 className="text-xl font-bold text-gray-900 mb-1">{user?.name}</h3>
+                <p className="text-teal-600 font-medium mb-4">{user?.seller?.business_name}</p>
+
+                <div className="space-y-3">
+                  <Button
+                    className="w-full bg-teal-600 hover:bg-teal-700"
+                    onClick={() => setIsEditing(!isEditing)}
                   >
-                    Visualiser mon profil
-                  </button>
-              )}
+                    {isEditing ? (
+                      <>
+                        <X className="h-4 w-4 mr-2" />
+                        Annuler
+                      </>
+                    ) : (
+                      <>
+                        <Edit3 className="h-4 w-4 mr-2" />
+                        Modifier le profil
+                      </>
+                    )}
+                  </Button>
+
+                  {user?.seller?.id && (
+                    <Button
+                      variant="outline"
+                      className="w-full"
+                      onClick={() => window.open(`/tailor/${user.seller.id}`, "_blank")}
+                    >
+                      <Eye className="h-4 w-4 mr-2" />
+                      Voir mon profil public
+                    </Button>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Quick Stats */}
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+              <h3 className="text-lg font-bold text-gray-900 mb-4">Statistiques</h3>
+              <div className="space-y-4">
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Profil complété</span>
+                  <span className="font-semibold text-teal-600">75%</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Note moyenne</span>
+                  <span className="font-semibold text-yellow-500">5.0 ⭐</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Membre depuis</span>
+                  <span className="font-semibold text-gray-900">2024</span>
+                </div>
+              </div>
             </div>
           </div>
 
-          {/* Profile Information */}
-          <div className="lg:col-span-2 bg-white rounded-lg shadow">
-            <div className="p-6 border-b border-gray-200">
-              <div className="flex justify-between items-center">
-                <h3 className="text-lg font-medium text-gray-900">Profile Information</h3>
-                <button
-                    onClick={() => setIsEditing(!isEditing)}
-                    className="bg-gray-600 text-white px-4 py-2 rounded-md text-sm hover:bg-gray-700 transition-colors"
-                >
-                  {isEditing ? "Cancel" : "Edit"}
-                </button>
+          {/* Main Profile Form */}
+          <div className="lg:col-span-2 space-y-6">
+            {/* Personal Information */}
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-3">
+                  <User className="h-6 w-6 text-teal-600" />
+                  Informations personnelles
+                </h2>
               </div>
-            </div>
 
-            <div className="p-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Business Name</label>
+                  <Label htmlFor="businessName" className="text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
+                    <Building2 className="h-4 w-4 text-teal-600" />
+                    Nom de l'entreprise
+                  </Label>
                   {isEditing ? (
-                      <input
-                          type="text"
-                          defaultValue={user?.seller?.business_name}
-                          className="w-full border border-gray-300 rounded-md px-3 py-2"
-                      />
+                    <Input
+                      id="businessName"
+                      type="text"
+                      defaultValue={user?.seller?.business_name}
+                      className="h-12 rounded-lg border-gray-200 focus:border-teal-500 focus:ring-teal-500"
+                    />
                   ) : (
-                      <p className="text-gray-900">{user?.seller?.business_name}</p>
+                    <div className="h-12 flex items-center px-3 bg-gray-50 rounded-lg">
+                      <span className="text-gray-900">{user?.seller?.business_name}</span>
+                    </div>
                   )}
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                  <Label htmlFor="email" className="text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
+                    <Mail className="h-4 w-4 text-teal-600" />
+                    Email
+                  </Label>
                   {isEditing ? (
-                      <input
-                          type="email"
-                          defaultValue={user?.email}
-                          className="w-full border border-gray-300 rounded-md px-3 py-2"
-                      />
+                    <Input
+                      id="email"
+                      type="email"
+                      defaultValue={user?.email}
+                      className="h-12 rounded-lg border-gray-200 focus:border-teal-500 focus:ring-teal-500"
+                    />
                   ) : (
-                      <p className="text-gray-900">{user?.email}</p>
+                    <div className="h-12 flex items-center px-3 bg-gray-50 rounded-lg">
+                      <span className="text-gray-900">{user?.email}</span>
+                    </div>
                   )}
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Phone Number</label>
+                  <Label htmlFor="phone" className="text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
+                    <Phone className="h-4 w-4 text-teal-600" />
+                    Téléphone
+                  </Label>
                   {isEditing ? (
-                      <input
-                          type="tel"
-                          placeholder="Enter phone number"
-                          className="w-full border border-gray-300 rounded-md px-3 py-2"
-                      />
+                    <Input
+                      id="phone"
+                      type="tel"
+                      placeholder="Votre numéro de téléphone"
+                      className="h-12 rounded-lg border-gray-200 focus:border-teal-500 focus:ring-teal-500"
+                    />
                   ) : (
-                      <p className="text-gray-900">Not provided</p>
+                    <div className="h-12 flex items-center px-3 bg-gray-50 rounded-lg">
+                      <span className="text-gray-500">Non renseigné</span>
+                    </div>
                   )}
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Location</label>
+                  <Label htmlFor="location" className="text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
+                    <MapPin className="h-4 w-4 text-teal-600" />
+                    Localisation
+                  </Label>
                   {isEditing ? (
-                      <input
-                          type="text"
-                          placeholder="Enter location"
-                          className="w-full border border-gray-300 rounded-md px-3 py-2"
-                      />
+                    <Input
+                      id="location"
+                      type="text"
+                      placeholder="Ville, Pays"
+                      className="h-12 rounded-lg border-gray-200 focus:border-teal-500 focus:ring-teal-500"
+                    />
                   ) : (
-                      <p className="text-gray-900">Not provided</p>
+                    <div className="h-12 flex items-center px-3 bg-gray-50 rounded-lg">
+                      <span className="text-gray-500">Non renseigné</span>
+                    </div>
                   )}
                 </div>
 
                 <div className="md:col-span-2">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Business Description</label>
+                  <Label htmlFor="description" className="text-sm font-medium text-gray-700 mb-2">
+                    Description de l'entreprise
+                  </Label>
                   {isEditing ? (
-                      <textarea
-                          rows={4}
-                          placeholder="Describe your business..."
-                          className="w-full border border-gray-300 rounded-md px-3 py-2"
-                      />
+                    <Textarea
+                      id="description"
+                      rows={4}
+                      placeholder="Décrivez votre entreprise, vos spécialités, votre savoir-faire..."
+                      className="rounded-lg border-gray-200 focus:border-teal-500 focus:ring-teal-500 resize-none"
+                    />
                   ) : (
-                      <p className="text-gray-900">No description provided</p>
+                    <div className="min-h-[100px] p-3 bg-gray-50 rounded-lg">
+                      <span className="text-gray-500">Aucune description fournie</span>
+                    </div>
                   )}
                 </div>
               </div>
 
               {isEditing && (
-                  <div className="mt-6 flex justify-end space-x-3">
-                    <button
-                        onClick={() => setIsEditing(false)}
-                        className="bg-gray-300 text-gray-700 px-4 py-2 rounded-md text-sm hover:bg-gray-400 transition-colors"
-                    >
-                      Cancel
-                    </button>
-                    <button className="bg-teal-600 text-white px-4 py-2 rounded-md text-sm hover:bg-teal-700 transition-colors">
-                      Save Changes
-                    </button>
-                  </div>
+                <div className="flex justify-end gap-3 mt-6 pt-6 border-t border-gray-200">
+                  <Button
+                    variant="outline"
+                    onClick={() => setIsEditing(false)}
+                  >
+                    Annuler
+                  </Button>
+                  <Button className="bg-teal-600 hover:bg-teal-700">
+                    <Save className="h-4 w-4 mr-2" />
+                    Sauvegarder
+                  </Button>
+                </div>
               )}
             </div>
-          </div>
-        </div>
 
-        {/* Business Settings */}
-        <div className="mt-6 bg-white rounded-lg shadow">
-          <div className="p-6 border-b border-gray-200">
-            <h3 className="text-lg font-medium text-gray-900">Business Settings</h3>
-          </div>
-          <div className="p-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Business Hours</label>
-                <select className="w-full border border-gray-300 rounded-md px-3 py-2">
-                  <option>9:00 AM - 6:00 PM</option>
-                  <option>8:00 AM - 8:00 PM</option>
-                  <option>24/7</option>
-                  <option>Custom</option>
-                </select>
+            {/* Business Settings */}
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
+              <h3 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-3">
+                <Settings className="h-6 w-6 text-teal-600" />
+                Paramètres professionnels
+              </h3>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <Label htmlFor="businessHours" className="text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
+                    <Clock className="h-4 w-4 text-teal-600" />
+                    Horaires de travail
+                  </Label>
+                  <Select>
+                    <SelectTrigger className="h-12 rounded-lg border-gray-200 focus:border-teal-500 focus:ring-teal-500">
+                      <SelectValue placeholder="Sélectionnez vos horaires" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="9-18">9h00 - 18h00</SelectItem>
+                      <SelectItem value="8-20">8h00 - 20h00</SelectItem>
+                      <SelectItem value="24-7">24h/24 - 7j/7</SelectItem>
+                      <SelectItem value="custom">Personnalisé</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div>
+                  <Label htmlFor="responseTime" className="text-sm font-medium text-gray-700 mb-2">
+                    Temps de réponse moyen
+                  </Label>
+                  <Select>
+                    <SelectTrigger className="h-12 rounded-lg border-gray-200 focus:border-teal-500 focus:ring-teal-500">
+                      <SelectValue placeholder="Temps de réponse" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="1h">Dans l'heure</SelectItem>
+                      <SelectItem value="24h">Sous 24h</SelectItem>
+                      <SelectItem value="48h">Sous 48h</SelectItem>
+                      <SelectItem value="1w">Sous 1 semaine</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Response Time</label>
-                <select className="w-full border border-gray-300 rounded-md px-3 py-2">
-                  <option>Within 1 hour</option>
-                  <option>Within 24 hours</option>
-                  <option>Within 48 hours</option>
-                  <option>Within 1 week</option>
-                </select>
+              <div className="flex justify-end mt-6 pt-6 border-t border-gray-200">
+                <Button className="bg-teal-600 hover:bg-teal-700">
+                  <Save className="h-4 w-4 mr-2" />
+                  Mettre à jour les paramètres
+                </Button>
               </div>
-            </div>
-
-            <div className="mt-6">
-              <button className="bg-teal-600 text-white px-4 py-2 rounded-md text-sm hover:bg-teal-700 transition-colors">
-                Update Settings
-              </button>
             </div>
           </div>
         </div>
       </div>
+    </div>
   )
 }
