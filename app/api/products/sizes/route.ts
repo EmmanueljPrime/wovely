@@ -9,9 +9,9 @@ export async function GET() {
 
     return NextResponse.json(sizes)
   } catch (error) {
-    console.error('Erreur lors de la récupération des tailles:', error)
+    console.error("Erreur lors de la récupération des tailles:", error)
     return NextResponse.json(
-      { error: 'Erreur serveur' },
+      { error: "Erreur interne du serveur" },
       { status: 500 }
     )
   }

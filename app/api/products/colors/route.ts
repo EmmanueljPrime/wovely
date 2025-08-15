@@ -9,9 +9,9 @@ export async function GET() {
 
     return NextResponse.json(colors)
   } catch (error) {
-    console.error('Erreur lors de la récupération des couleurs:', error)
+    console.error("Erreur lors de la récupération des couleurs:", error)
     return NextResponse.json(
-      { error: 'Erreur serveur' },
+      { error: "Erreur interne du serveur" },
       { status: 500 }
     )
   }

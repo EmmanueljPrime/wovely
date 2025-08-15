@@ -9,9 +9,9 @@ export async function GET() {
 
     return NextResponse.json(materials)
   } catch (error) {
-    console.error('Erreur lors de la récupération des matériaux:', error)
+    console.error("Erreur lors de la récupération des matériaux:", error)
     return NextResponse.json(
-      { error: 'Erreur serveur' },
+      { error: "Erreur interne du serveur" },
       { status: 500 }
     )
   }

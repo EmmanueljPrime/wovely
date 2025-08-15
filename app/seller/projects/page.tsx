@@ -78,21 +78,45 @@ export default function SellerProjects() {
 
   const handleSubmitProposal = async (e: React.FormEvent) => {
     e.preventDefault()
+    console.log("🚀 FRONTEND: Début soumission proposition")
+    console.log("📊 FRONTEND: Données du formulaire:", {
+      selectedProject: selectedProject,
+      projectId: selectedProject?.id,
+      newProposal: newProposal,
+      priceOriginal: newProposal.price,
+      priceParsed: parseFloat(newProposal.price)
+    })
+
     setSubmittingProposal(true)
 
     try {
+      const requestPayload = {
+        ...newProposal,
+        price: parseFloat(newProposal.price),
+      }
+
+      console.log("📤 FRONTEND: Payload envoyé:", requestPayload)
+      console.log("🎯 FRONTEND: URL appelée:", `/api/seller/projects/${selectedProject.id}/proposal`)
+
       const response = await fetch(`/api/seller/projects/${selectedProject.id}/proposal`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          ...newProposal,
-          price: parseFloat(newProposal.price),
-        }),
+        body: JSON.stringify(requestPayload),
+      })
+
+      console.log("📥 FRONTEND: Réponse reçue:", {
+        status: response.status,
+        statusText: response.statusText,
+        ok: response.ok,
+        headers: Object.fromEntries(response.headers.entries())
       })
 
       if (response.ok) {
+        const responseData = await response.json()
+        console.log("✅ FRONTEND: Succès - Data:", responseData)
+
         toast({
           title: "Offre envoyée !",
           description: "Votre proposition a été envoyée au client avec succès.",
@@ -101,16 +125,25 @@ export default function SellerProjects() {
         setNewProposal({ price: "", message: "", deliveryTime: "" })
         fetchAvailableProjects() // Refresh projects
       } else {
-        throw new Error("Erreur lors de l'envoi de l'offre")
+        const errorData = await response.json()
+        console.log("❌ FRONTEND: Erreur - Data:", errorData)
+
+        toast({
+          title: "Erreur",
+          description: errorData.error || "Une erreur est survenue lors de l'envoi de votre proposition.",
+          variant: "destructive",
+        })
       }
     } catch (error) {
+      console.error("💥 FRONTEND: Exception:", error)
       toast({
         title: "Erreur",
-        description: "Impossible d'envoyer l'offre. Veuillez réessayer.",
+        description: "Une erreur inattendue s'est produite.",
         variant: "destructive",
       })
     } finally {
       setSubmittingProposal(false)
+      console.log("🏁 FRONTEND: Fin du processus")
     }
   }
 
