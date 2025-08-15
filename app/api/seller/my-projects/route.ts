@@ -16,13 +16,12 @@ export async function GET(request: NextRequest) {
             return NextResponse.json({ error: "ID du vendeur manquant" }, { status: 400 })
         }
 
-        // Récupérer les projets liés à une proposition acceptée par ce vendeur
+        // Récupérer tous les projets où ce vendeur a fait une proposition
         const projects = await prisma.project.findMany({
             where: {
                 proposals: {
                     some: {
                         sellerId: sellerId,
-                        status: "accepted",
                     },
                 },
             },
@@ -40,11 +39,14 @@ export async function GET(request: NextRequest) {
                 proposals: {
                     where: {
                         sellerId: sellerId,
-                        status: "accepted",
                     },
                     select: {
+                        id: true,
                         price: true,
-                        updated_at: true, // à défaut de acceptedAt qui n’existe pas
+                        message: true,
+                        status: true,
+                        created_at: true,
+                        updated_at: true,
                     },
                 },
             },
@@ -53,21 +55,54 @@ export async function GET(request: NextRequest) {
             },
         })
 
-        // Formater les données
-        const formattedProjects = projects.map((project) => ({
-            id: project.id,
-            title: project.title,
-            description: project.description,
-            deadline: project.deadline,
-            status: project.status,
-            created_at: project.created_at,
-            updated_at: project.updated_at,
-            client: {
-                username: project.client.user.username,
-                email: project.client.user.email,
-            },
-            acceptedProposal: project.proposals[0] || null,
-        }))
+        // Formater les données avec la logique de statut appropriée
+        const formattedProjects = projects.map((project) => {
+            const myProposal = project.proposals[0] // Il ne devrait y avoir qu'une seule proposition par vendeur par projet
+
+            // Déterminer le statut affiché selon la logique métier
+            let displayStatus = "pending"
+
+            if (myProposal.status === "rejected") {
+                displayStatus = "cancelled"
+            } else if (myProposal.status === "pending") {
+                displayStatus = "pending"
+            } else if (myProposal.status === "accepted") {
+                // Si la proposition est acceptée, regarder le statut du projet
+                if (project.status === "pending") {
+                    displayStatus = "accepted"
+                } else if (project.status === "in_progress") {
+                    displayStatus = "in_progress"
+                } else if (project.status === "completed") {
+                    displayStatus = "completed"
+                } else {
+                    displayStatus = "accepted"
+                }
+            }
+
+            return {
+                id: project.id,
+                title: project.title,
+                description: project.description,
+                deadline: project.deadline,
+                status: displayStatus,
+                projectStatus: project.status, // Statut original du projet
+                proposalStatus: myProposal.status, // Statut original de la proposition
+                created_at: project.created_at,
+                updated_at: project.updated_at,
+                client: {
+                    username: project.client.user.username,
+                    email: project.client.user.email,
+                },
+                myProposal: {
+                    id: myProposal.id,
+                    price: myProposal.price,
+                    message: myProposal.message,
+                    status: myProposal.status,
+                    created_at: myProposal.created_at,
+                    updated_at: myProposal.updated_at,
+                },
+            }
+        })
 
         return NextResponse.json(formattedProjects)
     } catch (error) {
