@@ -295,27 +295,27 @@ export default function SellerDashboard() {
             </div>
 
             {/* Getting Started - DESIGN ORIGINAL avec logique dynamique */}
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-3">Premiers pas</h3>
-              <div className="space-y-3 text-sm">
-                <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
-                  <div className="w-2 h-2 bg-teal-600 rounded-full"></div>
-                  <span className="text-gray-700">Profil complété</span>
-                </div>
-                <div className={`flex items-center gap-3 p-3 bg-gray-50 rounded-lg`}>
-                  <div className={`w-2 h-2 rounded-full ${stats.products.total > 0 ? 'bg-teal-600' : 'bg-gray-300'}`}></div>
-                  <span className={stats.products.total > 0 ? 'text-gray-700' : 'text-gray-500'}>
-                    {stats.products.total > 0 ? `${stats.products.total} produit${stats.products.total > 1 ? 's' : ''} ajouté${stats.products.total > 1 ? 's' : ''}` : 'Ajoutez vos premiers produits'}
-                  </span>
-                </div>
-                <div className={`flex items-center gap-3 p-3 bg-gray-50 rounded-lg`}>
-                  <div className={`w-2 h-2 rounded-full ${stats.orders.total > 0 ? 'bg-teal-600' : 'bg-gray-300'}`}></div>
-                  <span className={stats.orders.total > 0 ? 'text-gray-700' : 'text-gray-500'}>
-                    {stats.orders.total > 0 ? `${stats.orders.total} commande${stats.orders.total > 1 ? 's' : ''} reçue${stats.orders.total > 1 ? 's' : ''}` : 'Recevez votre première commande'}
-                  </span>
-                </div>
-              </div>
-            </div>
+            {/*<div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">*/}
+            {/*  <h3 className="text-lg font-semibold text-gray-900 mb-3">Premiers pas</h3>*/}
+            {/*  <div className="space-y-3 text-sm">*/}
+            {/*    <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">*/}
+            {/*      <div className="w-2 h-2 bg-teal-600 rounded-full"></div>*/}
+            {/*      <span className="text-gray-700">Profil complété</span>*/}
+            {/*    </div>*/}
+            {/*    <div className={`flex items-center gap-3 p-3 bg-gray-50 rounded-lg`}>*/}
+            {/*      <div className={`w-2 h-2 rounded-full ${stats.products.total > 0 ? 'bg-teal-600' : 'bg-gray-300'}`}></div>*/}
+            {/*      <span className={stats.products.total > 0 ? 'text-gray-700' : 'text-gray-500'}>*/}
+            {/*        {stats.products.total > 0 ? `${stats.products.total} produit${stats.products.total > 1 ? 's' : ''} ajouté${stats.products.total > 1 ? 's' : ''}` : 'Ajoutez vos premiers produits'}*/}
+            {/*      </span>*/}
+            {/*    </div>*/}
+            {/*    <div className={`flex items-center gap-3 p-3 bg-gray-50 rounded-lg`}>*/}
+            {/*      <div className={`w-2 h-2 rounded-full ${stats.orders.total > 0 ? 'bg-teal-600' : 'bg-gray-300'}`}></div>*/}
+            {/*      <span className={stats.orders.total > 0 ? 'text-gray-700' : 'text-gray-500'}>*/}
+            {/*        {stats.orders.total > 0 ? `${stats.orders.total} commande${stats.orders.total > 1 ? 's' : ''} reçue${stats.orders.total > 1 ? 's' : ''}` : 'Recevez votre première commande'}*/}
+            {/*      </span>*/}
+            {/*    </div>*/}
+            {/*  </div>*/}
+            {/*</div>*/}
           </div>
         </div>
       </div>

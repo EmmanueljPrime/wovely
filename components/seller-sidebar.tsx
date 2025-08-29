@@ -86,10 +86,10 @@ export default function SellerSidebar() {
 
           {/* Notifications */}
           <div className="flex items-center justify-between">
-            <Button variant="ghost" size="icon" className="relative">
-              <Bell className="h-5 w-5" />
-              <span className="absolute -top-1 -right-1 h-3 w-3 bg-red-500 rounded-full text-xs"></span>
-            </Button>
+            <div variant="ghost" size="icon" className="relative">
+              {/*<Bell className="h-5 w-5" />*/}
+              {/*<span className="absolute -top-1 -right-1 h-3 w-3 bg-red-500 rounded-full text-xs"></span>*/}
+            </div>
 
             {/* Profile dropdown */}
             <DropdownMenu>
@@ -182,15 +182,15 @@ export default function SellerSidebar() {
                   >
                     Créer un produit
                   </Link>
-                  <Link
-                      href="/seller/catalogs/new"
-                      className={cn(
-                          "block px-4 py-2 text-sm rounded-md transition-colors",
-                          isActive("/seller/catalogs/new") ? "text-teal-600 font-medium" : "text-gray-600 hover:bg-gray-100",
-                      )}
-                  >
-                    Add New Catalog
-                  </Link>
+                  {/*<Link*/}
+                  {/*    href="/seller/catalogs/new"*/}
+                  {/*    className={cn(*/}
+                  {/*        "block px-4 py-2 text-sm rounded-md transition-colors",*/}
+                  {/*        isActive("/seller/catalogs/new") ? "text-teal-600 font-medium" : "text-gray-600 hover:bg-gray-100",*/}
+                  {/*    )}*/}
+                  {/*>*/}
+                  {/*  Add New Catalog*/}
+                  {/*</Link>*/}
                 </div>
             )}
           </div>

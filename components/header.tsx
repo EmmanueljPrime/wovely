@@ -94,24 +94,24 @@ export default function Header() {
                         <div className="h-8 w-8 rounded-full bg-gray-200 animate-pulse" />
                     ) : session ? (
                         <>
-                            <Link href={session.user.role === "CLIENT" ? "/client/messages" : "/seller/messages"}>
-                                <Button variant="ghost" size="icon" aria-label="Messages">
-                                    <svg
-                                        xmlns="http://www.w3.org/2000/svg"
-                                        width="24"
-                                        height="24"
-                                        viewBox="0 0 24 24"
-                                        fill="none"
-                                        stroke="currentColor"
-                                        strokeWidth="2"
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                        className="h-6 w-6"
-                                    >
-                                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
-                                    </svg>
-                                </Button>
-                            </Link>
+                            {/*<Link href={session.user.role === "CLIENT" ? "/client/messages" : "/seller/messages"}>*/}
+                            {/*    <Button variant="ghost" size="icon" aria-label="Messages">*/}
+                            {/*        <svg*/}
+                            {/*            xmlns="http://www.w3.org/2000/svg"*/}
+                            {/*            width="24"*/}
+                            {/*            height="24"*/}
+                            {/*            viewBox="0 0 24 24"*/}
+                            {/*            fill="none"*/}
+                            {/*            stroke="currentColor"*/}
+                            {/*            strokeWidth="2"*/}
+                            {/*            strokeLinecap="round"*/}
+                            {/*            strokeLinejoin="round"*/}
+                            {/*            className="h-6 w-6"*/}
+                            {/*        >*/}
+                            {/*            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>*/}
+                            {/*        </svg>*/}
+                            {/*    </Button>*/}
+                            {/*</Link>*/}
                             {session.user.role === "CLIENT" ? (
                                 <Link href="/client/cart">
                                     <Button variant="ghost" size="icon" aria-label="Cart">
