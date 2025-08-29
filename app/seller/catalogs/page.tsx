@@ -317,11 +317,13 @@ export default function SellerCatalogs() {
   }
 
   const getTotalValue = () => {
-    return products.reduce((sum, p) => sum + Number(p.price), 0)
+    if (!products || products.length === 0) return 0
+    return products.reduce((sum, p) => sum + Number(p.price || 0), 0)
   }
 
   const formatPrice = (price: number | string) => {
-    return Number(price).toFixed(2)
+    const numPrice = Number(price || 0)
+    return isNaN(numPrice) ? "0.00" : numPrice.toFixed(2)
   }
 
   if (isLoading) {
@@ -844,4 +846,3 @@ export default function SellerCatalogs() {
     </div>
   )
 }
-

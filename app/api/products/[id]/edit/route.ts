@@ -8,10 +8,13 @@ import path from "path"
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: { id: string } }
 ) {
   try {
+    console.log("✏️ Début de la modification de produit")
+
     const session = await getServerSession(authOptions)
+    console.log("👤 Session récupérée:", { hasSession: !!session, role: session?.user?.role })
 
     if (!session || session.user.role !== "SELLER") {
       return NextResponse.json(
@@ -20,7 +23,11 @@ export async function PUT(
       )
     }
 
+    // Attendre les paramètres pour Next.js 15
+    const params = await context.params
     const productId = parseInt(params.id)
+    console.log("🔢 ID du produit:", { original: params.id, parsed: productId, isValid: !isNaN(productId) })
+
     if (isNaN(productId)) {
       return NextResponse.json(
         { error: "ID de produit invalide" },

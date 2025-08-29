@@ -5,7 +5,7 @@ import { prisma } from "@/lib/prisma"
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: { id: string } }
 ) {
   try {
     console.log("🚀 Début de la création de proposition")
@@ -28,12 +28,12 @@ export async function POST(
       )
     }
 
-    // Attendre les params avant d'accéder à leurs propriétés
-    const resolvedParams = await params
-    console.log("📊 Params récupérés:", resolvedParams)
+    // Attendre les paramètres pour Next.js 15
+    const params = await context.params
+    console.log("📊 Params récupérés:", params)
 
-    const projectId = parseInt(resolvedParams.id)
-    console.log("🔢 ID du projet:", { original: resolvedParams.id, parsed: projectId, isValid: !isNaN(projectId) })
+    const projectId = parseInt(params.id)
+    console.log("🔢 ID du projet:", { original: params.id, parsed: projectId, isValid: !isNaN(projectId) })
 
     if (isNaN(projectId)) {
       console.log("❌ ID de projet invalide")

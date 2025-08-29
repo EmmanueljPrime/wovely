@@ -17,13 +17,13 @@ export async function GET() {
     // Retourner seulement le filtre type pro/amateur qui existe vraiment
     return NextResponse.json({
       types: [
-        {
-          label: `Particulier (${individualSellers})`,
-          value: 'individual'
+        { 
+          label: `Particulier (${individualSellers})`, 
+          value: 'individual' 
         },
-        {
-          label: `Professionnel (${professionalSellers})`,
-          value: 'professional'
+        { 
+          label: `Professionnel (${professionalSellers})`, 
+          value: 'professional' 
         }
       ]
     })
