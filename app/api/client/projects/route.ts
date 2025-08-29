@@ -13,27 +13,52 @@ export async function GET(request: NextRequest) {
             return NextResponse.json({ error: "Non autorisé" }, { status: 401 })
         }
 
-        const clientId = session.user.client?.id
-        if (!clientId) {
-            console.error("❌ clientId introuvable dans la session utilisateur")
+        const userId = parseInt(session.user.id)
+        const client = await prisma.client.findUnique({
+            where: { userId }
+        })
+
+        if (!client) {
+            console.error("❌ Profil client introuvable")
             return NextResponse.json({ error: "Client introuvable" }, { status: 400 })
         }
 
         const projects = await prisma.project.findMany({
-            where: { clientId },
+            where: { clientId: client.id },
             include: {
-                _count: {
+                proposals: {
                     select: {
-                        proposals: true,
-                    },
+                        id: true,
+                        status: true,
+                        price: true,
+                        seller: {
+                            select: {
+                                user: {
+                                    select: {
+                                        username: true
+                                    }
+                                }
+                            }
+                        }
+                    }
                 },
+                order: true, // Récupérer tous les champs au lieu de faire un select
+                seller: {
+                    include: {
+                        user: {
+                            select: {
+                                username: true
+                            }
+                        }
+                    }
+                }
             },
             orderBy: {
                 created_at: "desc",
             },
         })
 
-        console.log(`✅ ${projects.length} projets récupérés pour le client ${clientId}`)
+        console.log(`✅ ${projects.length} projets récupérés pour le client ${client.id}`)
 
         return NextResponse.json({ projects })
     } catch (error) {
@@ -52,6 +77,16 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: "Non autorisé" }, { status: 401 })
         }
 
+        const userId = parseInt(session.user.id)
+        const client = await prisma.client.findUnique({
+            where: { userId }
+        })
+
+        if (!client) {
+            console.error("❌ Profil client introuvable")
+            return NextResponse.json({ error: "Client introuvable" }, { status: 400 })
+        }
+
         const body = await request.json()
         console.log("📥 Données reçues :", body)
 
@@ -62,9 +97,9 @@ export async function POST(request: NextRequest) {
                 title,
                 description,
                 deadline: deadline ? new Date(deadline) : null,
-                clientId: session.user.client?.id!,
-                status: "OPEN",
-            },
+                clientId: client.id,
+                images: []
+            }
         })
 
         console.log("✅ Projet créé :", project)

@@ -7,14 +7,14 @@ import {
     DialogDescription,
     DialogHeader,
     DialogTitle,
-    DialogFooter,
 } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Badge } from "@/components/ui/badge"
-import { User, Euro, MessageSquare, Package, Edit, Trash2 } from "lucide-react"
-
-import EditProjectModal from "./edit-project-modal"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Alert, AlertDescription } from "@/components/ui/alert"
+import { User, Euro, MessageSquare, CheckCircle, Clock, AlertTriangle, Loader2, Mail, Phone, Building2, CreditCard, Info, X } from "lucide-react"
+import { useToast } from "@/hooks/use-toast"
 
 // Types
 type Proposal = {
@@ -23,6 +23,8 @@ type Proposal = {
     message: string
     sellerName: string
     sellerId: number
+    status: string
+    created_at: string
 }
 
 type Project = {
@@ -32,6 +34,13 @@ type Project = {
     deadline?: string
     created_at: string
     images: string[]
+    status?: string
+    order?: {
+        id: number
+        totalPrice: number
+        status: string
+        type: string
+    }
 }
 
 type ProjectModalProps = {
@@ -43,187 +52,296 @@ type ProjectModalProps = {
 }
 
 export default function ProjectProposalsModal({
-                                                  project,
-                                                  proposals,
-                                                  open,
-                                                  onClose,
-                                                  onProjectUpdated,
-                                              }: ProjectModalProps) {
-    const proposalCount = Array.isArray(proposals) ? proposals.length : 0
-    const [editOpen, setEditOpen] = useState(false)
+    project,
+    proposals,
+    open,
+    onClose,
+    onProjectUpdated,
+}: ProjectModalProps) {
+    const [acceptingProposal, setAcceptingProposal] = useState<number | null>(null)
+    const [rejectingProposal, setRejectingProposal] = useState<number | null>(null)
+    const [acceptedProposal, setAcceptedProposal] = useState<any>(null)
+    const { toast } = useToast()
 
-    const handleDelete = async () => {
-        if (!confirm("Êtes-vous sûr de vouloir supprimer ce projet ?")) return
+    const formatPrice = (price: string | number) => {
+        const numPrice = typeof price === 'string' ? parseFloat(price) : price
+        return new Intl.NumberFormat('fr-FR', {
+            style: 'currency',
+            currency: 'EUR',
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 2
+        }).format(numPrice)
+    }
+
+    const formatDate = (dateString: string) => {
+        return new Date(dateString).toLocaleDateString("fr-FR", {
+            year: "numeric",
+            month: "long",
+            day: "numeric",
+            hour: "2-digit",
+            minute: "2-digit"
+        })
+    }
+
+    const getStatusInfo = (status: string) => {
+        const statusMap = {
+            pending: { label: "En attente", color: "bg-yellow-100 text-yellow-800", icon: Clock },
+            accepted: { label: "Acceptée", color: "bg-green-100 text-green-800", icon: CheckCircle },
+            paid: { label: "Payée", color: "bg-green-100 text-green-800", icon: CheckCircle },
+            rejected: { label: "Refusée", color: "bg-red-100 text-red-800", icon: X }
+        }
+        return statusMap[status as keyof typeof statusMap] || statusMap.pending
+    }
+
+    const handleAcceptProposal = async (proposalId: number) => {
         try {
-            const res = await fetch(`/api/client/projects/${project.id}`, {
-                method: "DELETE",
+            setAcceptingProposal(proposalId)
+
+            // Accepter la proposition
+            const acceptResponse = await fetch(`/api/proposals/${proposalId}/accept`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' }
             })
-            if (!res.ok) throw new Error("Échec de la suppression")
+
+            if (!acceptResponse.ok) {
+                throw new Error('Erreur lors de l\'acceptation de la proposition')
+            }
+
+            toast({
+                title: "Proposition acceptée !",
+                description: "Vous pouvez maintenant organiser le paiement directement avec le vendeur.",
+            })
+
+            // Rafraîchir les données
+            if (onProjectUpdated) {
+                onProjectUpdated()
+            }
+
+            // Fermer le modal après acceptation
             onClose()
-            onProjectUpdated?.()
-        } catch (err) {
-            alert("Erreur lors de la suppression")
-            console.error(err)
+
+        } catch (error) {
+            console.error('Erreur:', error)
+            toast({
+                title: "Erreur",
+                description: "Impossible d'accepter la proposition. Veuillez réessayer.",
+                variant: "destructive"
+            })
+        } finally {
+            setAcceptingProposal(null)
         }
     }
 
-    const handleAccept = async (proposalId: number) => {
+    const handleRejectProposal = async (proposalId: number) => {
         try {
-            const res = await fetch(`/api/projects/${project.id}/proposals/${proposalId}/accept`, {
-                method: "POST",
+            setRejectingProposal(proposalId)
+
+            const rejectResponse = await fetch(`/api/proposals/${proposalId}/reject`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' }
             })
-            if (!res.ok) throw new Error("Erreur acceptation")
-            onClose()
-            onProjectUpdated?.()
-        } catch (err) {
-            alert("Erreur lors de l’acceptation")
+
+            if (!rejectResponse.ok) {
+                throw new Error('Erreur lors du refus de la proposition')
+            }
+
+            toast({
+                title: "Proposition refusée",
+                description: "La proposition a été refusée.",
+            })
+
+            // Rafraîchir les données
+            if (onProjectUpdated) {
+                onProjectUpdated()
+            }
+
+        } catch (error) {
+            console.error('Erreur:', error)
+            toast({
+                title: "Erreur",
+                description: "Impossible de refuser la proposition. Veuillez réessayer.",
+                variant: "destructive"
+            })
+        } finally {
+            setRejectingProposal(null)
         }
     }
 
-    const handleReject = async (proposalId: number) => {
-        try {
-            const res = await fetch(`/api/projects/${project.id}/proposals/${proposalId}/reject`, {
-                method: "POST",
-            })
-            if (!res.ok) throw new Error("Erreur refus")
-            onClose()
-            onProjectUpdated?.()
-        } catch (err) {
-            alert("Erreur lors du refus")
-        }
-    }
-
+    // Vérifier s'il y a des propositions en attente
+    const hasPendingProposals = proposals.some(p => p.status === 'pending')
+    const hasAcceptedProposal = proposals.some(p => p.status === 'accepted' || p.status === 'paid')
 
     return (
         <Dialog open={open} onOpenChange={onClose}>
-            <DialogContent className="max-w-2xl max-h-[90vh]">
-                <DialogHeader className="pb-4">
-                    <DialogTitle className="text-xl font-semibold flex items-center gap-2">
-                        <Package className="h-5 w-5 text-primary" />
-                        {project.title}
+            <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden">
+                <DialogHeader>
+                    <DialogTitle className="flex items-center gap-2 text-xl">
+                        <MessageSquare className="h-6 w-6 text-teal-600" />
+                        {hasPendingProposals ? `Propositions pour "${project.title}"` : `Détails du projet "${project.title}"`}
                     </DialogTitle>
-                    <div className="flex items-center gap-2">
-                        <DialogDescription className="text-base">
-                            Propositions déposées par les tailleurs
-                        </DialogDescription>
-                        <Badge variant="secondary" className="ml-auto">
-                            {proposalCount} proposition{proposalCount !== 1 ? "s" : ""}
-                        </Badge>
-                    </div>
+                    <DialogDescription>
+                        {hasPendingProposals
+                            ? `${proposals.length} proposition${proposals.length !== 1 ? 's' : ''} reçue${proposals.length !== 1 ? 's' : ''}`
+                            : "Suivi de votre projet"
+                        }
+                    </DialogDescription>
                 </DialogHeader>
 
-                <ScrollArea className="max-h-96 pr-4">
-                    <div className="space-y-4">
-                        {!Array.isArray(proposals) ? (
-                            <div className="flex items-center justify-center py-8">
-                                <div className="text-center">
-                                    <Package className="h-12 w-12 text-muted-foreground mx-auto mb-2" />
-                                    <p className="text-muted-foreground text-sm">Chargement des propositions...</p>
-                                </div>
-                            </div>
-                        ) : proposals.length === 0 ? (
-                            <div className="flex items-center justify-center py-8">
-                                <div className="text-center">
-                                    <MessageSquare className="h-12 w-12 text-muted-foreground mx-auto mb-2" />
-                                    <p className="text-muted-foreground font-medium">Aucune proposition reçue</p>
-                                    <p className="text-muted-foreground text-sm mt-1">
-                                        Les tailleurs n'ont pas encore soumis de propositions pour ce projet.
-                                    </p>
-                                </div>
-                            </div>
-                        ) : (
-                            proposals.map((proposal) => (
-                                <div
-                                    key={proposal.id}
-                                    className="border border-border rounded-lg p-4 bg-card hover:bg-accent/50 transition-colors"
-                                >
-                                    <div className="flex items-center justify-between mb-3">
-                                        <div className="flex items-center gap-2">
-                                            <User className="h-4 w-4 text-primary"/>
-                                            <span className="font-medium text-foreground">{proposal.sellerName}</span>
-                                        </div>
-                                        <div className="flex items-center gap-1">
-                                            <Euro className="h-4 w-4 text-green-600"/>
-                                            <span
-                                                className="font-semibold text-lg text-green-600">{proposal.price} €</span>
-                                        </div>
-                                    </div>
+                {/* Informations importantes sur le paiement manuel */}
+                {hasAcceptedProposal && (
+                    <Alert className="bg-blue-50 border-blue-200">
+                        <Info className="h-4 w-4 text-blue-600" />
+                        <AlertDescription className="text-blue-800">
+                            <strong>Information importante :</strong> Pour les projets sur-mesure, le paiement se fait directement avec le vendeur.
+                            Vous pourrez organiser le paiement par virement, PayPal ou tout autre moyen convenu ensemble.
+                        </AlertDescription>
+                    </Alert>
+                )}
 
-                                    <div className="space-y-2">
-                                        <div className="flex items-center gap-2">
-                                            <MessageSquare className="h-3 w-3 text-muted-foreground"/>
-                                            <span
-                                                className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                        Message
-                      </span>
-                                        </div>
-                                        <p className="text-sm text-muted-foreground leading-relaxed pl-5">
-                                            {proposal.message}
-                                        </p>
-                                    </div>
+                <ScrollArea className="max-h-[60vh] pr-4">
+                    {proposals.length === 0 ? (
+                        <div className="text-center py-8">
+                            <MessageSquare className="h-12 w-12 text-gray-300 mx-auto mb-4" />
+                            <h3 className="text-lg font-medium text-gray-900 mb-2">
+                                Aucune proposition pour le moment
+                            </h3>
+                            <p className="text-gray-600">
+                                Les créateurs vont bientôt vous envoyer leurs propositions.
+                            </p>
+                        </div>
+                    ) : (
+                        <div className="space-y-4">
+                            {proposals.map((proposal) => {
+                                const statusInfo = getStatusInfo(proposal.status)
+                                const StatusIcon = statusInfo.icon
+                                const isProcessing = acceptingProposal === proposal.id || rejectingProposal === proposal.id
+                                const isPending = proposal.status === 'pending'
 
-                                    <div className="mt-4 flex gap-2 flex-wrap">
-                                        <button
-                                            onClick={() => handleAccept(proposal.id)}
-                                            className="px-4 py-2 text-sm rounded-md bg-green-100 text-green-800 hover:bg-green-200 "
-                                        >
-                                            Accepter
-                                        </button>
-                                        <button
-                                            onClick={() => handleReject(proposal.id)}
-                                            className="px-4 py-2 text-sm rounded-md bg-red-100 text-red-800 hover:bg-red-200 "
-                                        >
-                                            Refuser
-                                        </button>
-                                        <button
-                                            onClick={() => window.open(`/tailor/${proposal.sellerId}`, "_blank")}
-                                            className="px-4 py-2 text-sm rounded-md bg-gray-100 text-gray-800 hover:bg-gray-200 "
-                                        >
-                                            Voir le profil
-                                        </button>
-                                    </div>
+                                return (
+                                    <Card key={proposal.id} className="hover:shadow-md transition-shadow">
+                                        <CardHeader className="pb-4">
+                                            <div className="flex justify-between items-start">
+                                                <div className="flex items-center gap-3">
+                                                    <div className="bg-teal-100 p-2 rounded-full">
+                                                        <User className="h-4 w-4 text-teal-600" />
+                                                    </div>
+                                                    <div>
+                                                        <h4 className="font-semibold text-gray-900">
+                                                            {proposal.sellerName}
+                                                        </h4>
+                                                        <p className="text-sm text-gray-500">
+                                                            Proposé le {formatDate(proposal.created_at)}
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                                <div className="flex items-center gap-3">
+                                                    <Badge className={statusInfo.color}>
+                                                        <StatusIcon className="h-3 w-3 mr-1" />
+                                                        {statusInfo.label}
+                                                    </Badge>
+                                                    <div className="text-right">
+                                                        <div className="text-2xl font-bold text-teal-600">
+                                                            {formatPrice(proposal.price)}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </CardHeader>
 
+                                        <CardContent>
+                                            <div className="bg-gray-50 rounded-lg p-4 mb-4">
+                                                <p className="text-gray-700 whitespace-pre-wrap">
+                                                    {proposal.message}
+                                                </p>
+                                            </div>
 
-                                </div>
-                            ))
-                        )}
-                    </div>
+                                            <div className="flex justify-end gap-3">
+                                                {isPending && (
+                                                    <>
+                                                        <Button
+                                                            onClick={() => handleRejectProposal(proposal.id)}
+                                                            disabled={isProcessing}
+                                                            variant="outline"
+                                                            className="border-red-300 text-red-600 hover:bg-red-50"
+                                                        >
+                                                            {rejectingProposal === proposal.id ? (
+                                                                <>
+                                                                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                                                                    Refus...
+                                                                </>
+                                                            ) : (
+                                                                <>
+                                                                    <X className="h-4 w-4 mr-2" />
+                                                                    Refuser
+                                                                </>
+                                                            )}
+                                                        </Button>
+                                                        <Button
+                                                            onClick={() => handleAcceptProposal(proposal.id)}
+                                                            disabled={isProcessing}
+                                                            className="bg-green-600 hover:bg-green-700"
+                                                        >
+                                                            {acceptingProposal === proposal.id ? (
+                                                                <>
+                                                                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                                                                    Acceptation...
+                                                                </>
+                                                            ) : (
+                                                                <>
+                                                                    <CheckCircle className="h-4 w-4 mr-2" />
+                                                                    Accepter
+                                                                </>
+                                                            )}
+                                                        </Button>
+                                                    </>
+                                                )}
+
+                                                {(proposal.status === 'accepted') && (
+                                                    <div className="space-y-3 w-full">
+                                                        <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                                                            <div className="flex items-center gap-2 mb-2">
+                                                                <CheckCircle className="h-4 w-4 text-green-600" />
+                                                                <span className="font-medium text-green-900">Proposition acceptée</span>
+                                                            </div>
+                                                            <p className="text-green-800 text-sm mb-3">
+                                                                Organisez le paiement directement avec le vendeur ({formatPrice(proposal.price)}).
+                                                            </p>
+                                                            <div className="space-y-2 text-sm">
+                                                                <div className="flex items-center gap-2 text-gray-700">
+                                                                    <Mail className="h-3 w-3" />
+                                                                    <span>Contactez le vendeur par message privé</span>
+                                                                </div>
+                                                                <div className="flex items-center gap-2 text-gray-700">
+                                                                    <CreditCard className="h-3 w-3" />
+                                                                    <span>Méthodes : Virement, PayPal, espèces...</span>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                )}
+
+                                                {proposal.status === 'paid' && (
+                                                    <div className="flex items-center gap-2 text-green-600 bg-green-50 px-3 py-2 rounded-md">
+                                                        <CheckCircle className="h-4 w-4" />
+                                                        <span className="font-medium">Payé - Projet en cours</span>
+                                                    </div>
+                                                )}
+
+                                                {proposal.status === 'rejected' && (
+                                                    <div className="flex items-center gap-2 text-red-600 bg-red-50 px-3 py-2 rounded-md">
+                                                        <X className="h-4 w-4" />
+                                                        <span className="font-medium">Proposition refusée</span>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </CardContent>
+                                    </Card>
+                                )
+                            })}
+                        </div>
+                    )}
                 </ScrollArea>
-
-                <DialogFooter className="flex flex-col sm:flex-row gap-3 pt-6 border-t">
-                    <div className="flex gap-3 w-full">
-                        <Button
-                            variant="outline"
-                            className="flex-1 sm:flex-none h-11 px-6 rounded-xl border-2 hover:bg-primary/5 hover:border-primary/20 transition-all duration-200"
-                            onClick={() => setEditOpen(true)}
-                        >
-                        <Edit className="h-4 w-4 mr-2 text-primary" />
-                            <span className="font-medium">Modifier le projet</span>
-                        </Button>
-                        <Button
-                            variant="destructive"
-                            className="flex-1 sm:flex-none h-11 px-6 rounded-xl bg-teal-500 hover:bg-teal-600 border-0 shadow-sm hover:shadow-md transition-all duration-200"
-                            onClick={handleDelete}
-                        >
-                            <Trash2 className="h-4 w-4 mr-2" />
-                            <span className="font-medium">Supprimer le projet</span>
-                        </Button>
-                    </div>
-                </DialogFooter>
             </DialogContent>
-
-            {editOpen && (
-                <EditProjectModal
-                    open={editOpen}
-                    onClose={() => setEditOpen(false)}
-                    project={project}
-                    onUpdated={() => {
-                        setEditOpen(false)
-                        onClose()
-                        onProjectUpdated?.()
-                    }}
-                />
-            )}
         </Dialog>
     )
 }

@@ -18,6 +18,9 @@ type Project = {
     deadline?: string
     created_at: string
     images: string[]
+    status?: string
+    hasAcceptedProposal?: boolean
+    hasPendingProposals?: boolean
 }
 
 type Proposal = {
@@ -52,7 +55,17 @@ export default function ClientProjects() {
         try {
             const res = await fetch("/api/client/projects")
             const data = await res.json()
-            setProjects(data.projects || [])
+
+            // Enrichir les projets avec les informations sur les propositions
+            const enrichedProjects = data.projects?.map((project: any) => ({
+                ...project,
+                hasAcceptedProposal: project.proposals?.some((p: any) =>
+                    p.status === 'accepted' || p.status === 'paid'
+                ),
+                hasPendingProposals: project.proposals?.some((p: any) => p.status === 'pending')
+            })) || []
+
+            setProjects(enrichedProjects)
         } catch (error) {
             console.error("Erreur lors du chargement des projets", error)
         } finally {
@@ -123,6 +136,16 @@ export default function ClientProjects() {
             })
         } finally {
             setSubmitting(false)
+        }
+    }
+
+    const getProjectButtonText = (project: Project) => {
+        if (project.hasPendingProposals) {
+            return "Voir les propositions"
+        } else if (project.hasAcceptedProposal) {
+            return "Voir les détails"
+        } else {
+            return "Voir les propositions"
         }
     }
 
@@ -259,7 +282,7 @@ export default function ClientProjects() {
                                     onClick={() => handleOpenProposalsModal(project)}
                                     className="w-full mt-4 bg-teal-600 hover:bg-teal-700"
                                 >
-                                    Voir les propositions
+                                    {getProjectButtonText(project)}
                                 </Button>
                             </div>
                         ))}

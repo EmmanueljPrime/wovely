@@ -3,10 +3,7 @@ import { headers } from "next/headers"
 import Stripe from "stripe"
 import { prisma } from "@/lib/prisma"
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: "2024-06-20",
-})
-
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!)
 const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET!
 
 export async function POST(request: NextRequest) {
@@ -27,7 +24,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Gérer l'événement de paiement réussi
+    // Gérer uniquement les paiements de produits
     if (event.type === "checkout.session.completed") {
       const session = event.data.object as Stripe.Checkout.Session
 
@@ -82,7 +79,7 @@ export async function POST(request: NextRequest) {
           }
         })
 
-        console.log(`✅ Commande créée avec succès pour le client ${clientId}`)
+        console.log(`✅ Commande produit créée avec succès pour le client ${clientId}`)
       }
     }
 
