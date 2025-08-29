@@ -79,12 +79,7 @@ export default async function ProductPage({ params }: { params: { id: string } }
             </div>
 
             {/* Taille et stock */}
-            <SizeSelector productStocks={product.stockBySize} />
-
-            <div className="flex gap-4 pt-4">
-              <Button className="flex-1">Ajouter au panier</Button>
-              <Button variant="outline" className="flex-1">Acheter maintenant</Button>
-            </div>
+            <SizeSelector productId={product.id} productStocks={product.stockBySize} />
 
             <div>
               <h3 className="font-medium mb-2">Description</h3>

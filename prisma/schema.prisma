@@ -1,5 +1,6 @@
 generator client {
   provider = "prisma-client-js"
+  output   = "./generated/client"
 }
 
 datasource db {
@@ -77,10 +78,11 @@ model Client {
   receiveAlerts Boolean @default(false)
 
   // Relations
-  userId   Int       @unique
-  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  projects Project[]
-  orders   Order[]
+  userId    Int        @unique
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  projects  Project[]
+  orders    Order[]
+  cartItems CartItem[]
 }
 
 model Seller {
@@ -131,9 +133,10 @@ model Product {
   created_at  DateTime @default(now())
   updated_at  DateTime @updatedAt
 
-  //Relations
+  // Relations
   images      Image[]
   orders      Order[]
+  cartItems   CartItem[]
   sellerId    Int
   seller      Seller         @relation(fields: [sellerId], references: [id])
   categoryId  String?
@@ -151,7 +154,7 @@ model Image {
   id  Int    @id @default(autoincrement())
   url String
 
-  //Relations
+  // Relations
   productId Int
   product   Product @relation(fields: [productId], references: [id])
 }
@@ -167,6 +170,7 @@ model Size {
   name         String         @unique
   products     Product[]
   ProductStock ProductStock[]
+  cartItems    CartItem[]
 }
 
 model Color {
@@ -186,12 +190,12 @@ model Project {
   title       String
   description String    @db.Text
   deadline    DateTime?
-  status      String    @default("pending") //Status: pending, accepted, in_progress, completed
+  status      String    @default("pending") // Status: pending, accepted, in_progress, completed
   images      String[]
   created_at  DateTime  @default(now())
   updated_at  DateTime  @updatedAt
 
-  //Relations
+  // Relations
   proposals Proposal[]
   order     Order?
   clientId  Int
@@ -205,11 +209,11 @@ model Proposal {
   id         Int       @id @default(autoincrement())
   price      Decimal   @db.Decimal(10, 2)
   message    String
-  status     String    @default("pending") //Status : pending, accepted, rejected
+  status     String    @default("pending") // Status : pending, accepted, rejected
   created_at DateTime  @default(now())
   updated_at DateTime? @updatedAt
 
-  //Relations
+  // Relations
   projectId Int
   project   Project @relation(fields: [projectId], references: [id])
   sellerId  Int
@@ -226,7 +230,7 @@ model Advert {
   status      String   @default("active") // Status : active, closed
   created_at  DateTime @default(now())
 
-  //Relations
+  // Relations
   proposals Proposal[]
   sellerId  Int
   seller    Seller     @relation(fields: [sellerId], references: [id])
@@ -243,7 +247,7 @@ model Order {
   created_at    DateTime @default(now())
   updated_at    DateTime @updatedAt
 
-  //Relations
+  // Relations
   productId Int
   product   Product  @relation(fields: [productId], references: [id])
   projectId Int?     @unique
@@ -275,6 +279,23 @@ model Notification {
   // Relations
   userId Int
   user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model CartItem {
+  id         Int      @id @default(autoincrement())
+  quantity   Int      @default(1)
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  // Relations
+  clientId  Int
+  client    Client  @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  productId Int
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  sizeId    String
+  size      Size    @relation(fields: [sizeId], references: [id])
+
+  @@unique([clientId, productId, sizeId])
 }
 
 enum Role {
