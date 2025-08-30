@@ -14,7 +14,6 @@ import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { User, Euro, MessageSquare, CheckCircle, Clock, AlertTriangle, Loader2, Mail, Phone, Building2, CreditCard, Info, X } from "lucide-react"
-import { useToast } from "@/hooks/use-toast"
 
 // Types
 type Proposal = {
@@ -61,7 +60,6 @@ export default function ProjectProposalsModal({
     const [acceptingProposal, setAcceptingProposal] = useState<number | null>(null)
     const [rejectingProposal, setRejectingProposal] = useState<number | null>(null)
     const [acceptedProposal, setAcceptedProposal] = useState<any>(null)
-    const { toast } = useToast()
 
     const formatPrice = (price: string | number) => {
         const numPrice = typeof price === 'string' ? parseFloat(price) : price
@@ -107,11 +105,6 @@ export default function ProjectProposalsModal({
                 throw new Error('Erreur lors de l\'acceptation de la proposition')
             }
 
-            toast({
-                title: "Proposition acceptée !",
-                description: "Vous pouvez maintenant organiser le paiement directement avec le vendeur.",
-            })
-
             // Rafraîchir les données
             if (onProjectUpdated) {
                 onProjectUpdated()
@@ -122,11 +115,6 @@ export default function ProjectProposalsModal({
 
         } catch (error) {
             console.error('Erreur:', error)
-            toast({
-                title: "Erreur",
-                description: "Impossible d'accepter la proposition. Veuillez réessayer.",
-                variant: "destructive"
-            })
         } finally {
             setAcceptingProposal(null)
         }
@@ -145,11 +133,6 @@ export default function ProjectProposalsModal({
                 throw new Error('Erreur lors du refus de la proposition')
             }
 
-            toast({
-                title: "Proposition refusée",
-                description: "La proposition a été refusée.",
-            })
-
             // Rafraîchir les données
             if (onProjectUpdated) {
                 onProjectUpdated()
@@ -157,11 +140,6 @@ export default function ProjectProposalsModal({
 
         } catch (error) {
             console.error('Erreur:', error)
-            toast({
-                title: "Erreur",
-                description: "Impossible de refuser la proposition. Veuillez réessayer.",
-                variant: "destructive"
-            })
         } finally {
             setRejectingProposal(null)
         }

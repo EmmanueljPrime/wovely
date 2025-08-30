@@ -22,7 +22,6 @@ import {
   Clock,
   Filter
 } from "lucide-react"
-import { useToast } from "@/hooks/use-toast"
 
 export default function SellerProjects() {
   const { user, isLoading, hasCorrectRole } = useRequireRole("SELLER")
@@ -34,7 +33,6 @@ export default function SellerProjects() {
   const [modalOpen, setModalOpen] = useState(false)
   const [proposalModalOpen, setProposalModalOpen] = useState(false)
   const [submittingProposal, setSubmittingProposal] = useState(false)
-  const { toast } = useToast()
 
   // Form states for new proposal
   const [newProposal, setNewProposal] = useState({
@@ -117,10 +115,7 @@ export default function SellerProjects() {
         const responseData = await response.json()
         console.log("✅ FRONTEND: Succès - Data:", responseData)
 
-        toast({
-          title: "Offre envoyée !",
-          description: "Votre proposition a été envoyée au client avec succès.",
-        })
+        // Afficher une notification de succès
         setProposalModalOpen(false)
         setNewProposal({ price: "", message: "", deliveryTime: "" })
         fetchAvailableProjects() // Refresh projects
@@ -128,19 +123,11 @@ export default function SellerProjects() {
         const errorData = await response.json()
         console.log("❌ FRONTEND: Erreur - Data:", errorData)
 
-        toast({
-          title: "Erreur",
-          description: errorData.error || "Une erreur est survenue lors de l'envoi de votre proposition.",
-          variant: "destructive",
-        })
+        // Afficher une notification d'erreur
       }
     } catch (error) {
       console.error("💥 FRONTEND: Exception:", error)
-      toast({
-        title: "Erreur",
-        description: "Une erreur inattendue s'est produite.",
-        variant: "destructive",
-      })
+      // Afficher une notification d'erreur
     } finally {
       setSubmittingProposal(false)
       console.log("🏁 FRONTEND: Fin du processus")

@@ -9,7 +9,6 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
 import { Plus, FolderOpen, Calendar, Clock, Eye, Edit, Trash2 } from "lucide-react"
-import { useToast } from "@/hooks/use-toast"
 
 type Project = {
     id: string
@@ -40,7 +39,6 @@ export default function ClientProjects() {
     const [createModalOpen, setCreateModalOpen] = useState(false)
     const [loading, setLoading] = useState(true)
     const [refreshKey, setRefreshKey] = useState(0)
-    const { toast } = useToast()
 
     // Form states for new project
     const [newProject, setNewProject] = useState({
@@ -118,10 +116,6 @@ export default function ClientProjects() {
             })
 
             if (res.ok) {
-                toast({
-                    title: "Projet créé !",
-                    description: "Votre projet a été créé avec succès.",
-                })
                 setCreateModalOpen(false)
                 setNewProject({ title: "", description: "", deadline: "" })
                 setRefreshKey(prev => prev + 1)
@@ -129,11 +123,7 @@ export default function ClientProjects() {
                 throw new Error("Erreur lors de la création")
             }
         } catch (error) {
-            toast({
-                title: "Erreur",
-                description: "Impossible de créer le projet. Veuillez réessayer.",
-                variant: "destructive",
-            })
+            console.error("Erreur lors de la création du projet", error)
         } finally {
             setSubmitting(false)
         }

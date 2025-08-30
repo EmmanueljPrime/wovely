@@ -1,7 +1,8 @@
 "use client"
 
 import { useRequireRole } from "@/hooks/use-auth"
-import { useState } from "react"
+import { useState, useEffect } from "react"
+import { useSession } from "next-auth/react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -19,7 +20,6 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 // import { Switch } from "@/components/ui/switch"
-import { useToast } from "@/hooks/use-toast"
 import {
   Settings,
   User,
@@ -41,11 +41,11 @@ import {
 
 export default function SellerAccountSettings() {
   const { user, isLoading, hasCorrectRole } = useRequireRole("SELLER")
+  const { update } = useSession() // Ajout pour forcer la mise à jour de la session
   const [isEditing, setIsEditing] = useState(false)
   const [isUpdating, setIsUpdating] = useState(false)
   const [isChangingPassword, setIsChangingPassword] = useState(false)
   const [isDeletingAccount, setIsDeletingAccount] = useState(false)
-  const { toast } = useToast()
 
   // État pour les formulaires
   const [profileData, setProfileData] = useState({
@@ -84,26 +84,14 @@ export default function SellerAccountSettings() {
       })
 
       if (response.ok) {
-        toast({
-          title: "Succès",
-          description: "Profil mis à jour avec succès",
-        })
         setIsEditing(false)
         window.location.reload()
       } else {
         const error = await response.json()
-        toast({
-          title: "Erreur",
-          description: error.message || "Erreur lors de la mise à jour",
-          variant: "destructive"
-        })
+        console.error('Erreur lors de la mise à jour:', error.message || "Erreur lors de la mise à jour")
       }
     } catch (error) {
-      toast({
-        title: "Erreur",
-        description: "Erreur de connexion",
-        variant: "destructive"
-      })
+      console.error('Erreur de connexion:', error)
     } finally {
       setIsUpdating(false)
     }
@@ -113,11 +101,7 @@ export default function SellerAccountSettings() {
     e.preventDefault()
 
     if (passwordData.newPassword !== passwordData.confirmPassword) {
-      toast({
-        title: "Erreur",
-        description: "Les mots de passe ne correspondent pas",
-        variant: "destructive"
-      })
+      console.error('Les mots de passe ne correspondent pas')
       return
     }
 
@@ -136,25 +120,14 @@ export default function SellerAccountSettings() {
       })
 
       if (response.ok) {
-        toast({
-          title: "Succès",
-          description: "Mot de passe modifié avec succès",
-        })
+        console.log('Mot de passe modifié avec succès')
         setPasswordData({ currentPassword: "", newPassword: "", confirmPassword: "" })
       } else {
         const error = await response.json()
-        toast({
-          title: "Erreur",
-          description: error.message || "Erreur lors du changement de mot de passe",
-          variant: "destructive"
-        })
+        console.error('Erreur lors du changement de mot de passe:', error.message || "Erreur lors du changement de mot de passe")
       }
     } catch (error) {
-      toast({
-        title: "Erreur",
-        description: "Erreur de connexion",
-        variant: "destructive"
-      })
+      console.error('Erreur de connexion:', error)
     } finally {
       setIsChangingPassword(false)
     }
@@ -169,26 +142,15 @@ export default function SellerAccountSettings() {
       })
 
       if (response.ok) {
-        toast({
-          title: "Compte supprimé",
-          description: "Votre compte a été supprimé avec succès",
-        })
+        console.log('Compte supprimé avec succès')
         // Redirection vers la page d'accueil
         window.location.href = '/'
       } else {
         const error = await response.json()
-        toast({
-          title: "Erreur",
-          description: error.message || "Erreur lors de la suppression",
-          variant: "destructive"
-        })
+        console.error('Erreur lors de la suppression:', error.message || "Erreur lors de la suppression")
       }
     } catch (error) {
-      toast({
-        title: "Erreur",
-        description: "Erreur de connexion",
-        variant: "destructive"
-      })
+      console.error('Erreur de connexion:', error)
     } finally {
       setIsDeletingAccount(false)
     }
