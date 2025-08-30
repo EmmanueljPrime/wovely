@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { useRouter, useSearchParams, usePathname } from 'next/navigation'
 
 export interface FilterState {
-  [key: string]: string | string[]
+  [key: string]: string[]
 }
 
 export function useFilters(initialFilters: FilterState = {}) {
@@ -18,21 +18,40 @@ export function useFilters(initialFilters: FilterState = {}) {
   useEffect(() => {
     const urlFilters: FilterState = {}
     searchParams.forEach((value, key) => {
-      urlFilters[key] = value
+      // Convertir les valeurs séparées par des virgules en tableaux
+      urlFilters[key] = value.split(',').filter(v => v.trim() !== '')
     })
-    setFilters(prev => ({ ...prev, ...urlFilters }))
+    setFilters(urlFilters)
   }, [searchParams])
 
-  // Mettre à jour un filtre
-  const updateFilter = (key: string, value: string | null) => {
+  // Mettre à jour un filtre avec support multi-sélection
+  const updateFilter = (key: string, value: string | null, action: 'add' | 'remove' | 'clear' = 'add') => {
     setIsLoading(true)
 
     const newFilters = { ...filters }
 
-    if (value === null || value === '') {
+    if (action === 'clear' || value === null) {
+      // Supprimer complètement le filtre
       delete newFilters[key]
     } else {
-      newFilters[key] = value
+      // Initialiser le tableau si il n'existe pas
+      if (!newFilters[key]) {
+        newFilters[key] = []
+      }
+
+      if (action === 'add') {
+        // Ajouter la valeur si elle n'existe pas déjà
+        if (!newFilters[key].includes(value)) {
+          newFilters[key] = [...newFilters[key], value]
+        }
+      } else if (action === 'remove') {
+        // Supprimer la valeur
+        newFilters[key] = newFilters[key].filter(v => v !== value)
+        // Supprimer le filtre complètement si le tableau est vide
+        if (newFilters[key].length === 0) {
+          delete newFilters[key]
+        }
+      }
     }
 
     setFilters(newFilters)
@@ -40,8 +59,8 @@ export function useFilters(initialFilters: FilterState = {}) {
     // Construire la nouvelle URL avec les paramètres
     const params = new URLSearchParams()
     Object.entries(newFilters).forEach(([k, v]) => {
-      if (v && v !== '') {
-        params.set(k, Array.isArray(v) ? v.join(',') : v)
+      if (v && v.length > 0) {
+        params.set(k, v.join(','))
       }
     })
 
@@ -63,7 +82,12 @@ export function useFilters(initialFilters: FilterState = {}) {
 
   // Vérifier si un filtre est actif
   const isFilterActive = (key: string, value: string) => {
-    return filters[key] === value
+    return filters[key]?.includes(value) || false
+  }
+
+  // Obtenir le nombre de filtres actifs pour un filtre donné
+  const getActiveFilterCount = (key: string) => {
+    return filters[key]?.length || 0
   }
 
   return {
@@ -71,6 +95,7 @@ export function useFilters(initialFilters: FilterState = {}) {
     updateFilter,
     clearFilters,
     isFilterActive,
+    getActiveFilterCount,
     isLoading
   }
 }

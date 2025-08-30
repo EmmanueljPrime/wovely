@@ -169,7 +169,7 @@ export default function ContactPage() {
                                 Consultez notre FAQ pour trouver des réponses aux questions les plus fréquentes
                             </p>
                             <a
-                                href="/public/faq"
+                                href="/faq"
                                 className="inline-flex items-center gap-2 bg-white text-teal-600 px-6 py-3 rounded-lg font-medium hover:bg-gray-50 transition-colors"
                             >
                                 <MessageSquare className="h-5 w-5" />

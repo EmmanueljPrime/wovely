@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button"
 import { useFilters } from "@/hooks/use-filters"
 import { cn } from "@/lib/utils"
 import { useState, useEffect } from "react"
+import { Check } from "lucide-react"
 
 interface FilterOption {
   label: string
@@ -30,45 +31,103 @@ interface FilterDropdownProps {
 }
 
 function FilterDropdown({ title, filterKey, options, className }: FilterDropdownProps) {
-  const { filters, updateFilter, isFilterActive } = useFilters()
+  const { filters, updateFilter, isFilterActive, getActiveFilterCount } = useFilters()
+  const [isOpen, setIsOpen] = useState(false)
 
   if (options.length === 0) return null
 
+  const activeCount = getActiveFilterCount(filterKey)
+
+  const handleOptionToggle = (value: string) => {
+    const action = isFilterActive(filterKey, value) ? 'remove' : 'add'
+    updateFilter(filterKey, value, action)
+  }
+
+  const handleClearFilter = () => {
+    updateFilter(filterKey, null, 'clear')
+  }
+
   return (
-    <div className={cn("relative group", className)}>
+    <div className={cn("relative", className)}>
       <Button
-        variant="ghost"
+        variant="outline"
         className={cn(
-          "flex items-center gap-1",
-          filters[filterKey] && "bg-teal-50 text-teal-700 border border-teal-200"
+          "flex items-center gap-2 h-10",
+          activeCount > 0 && "bg-teal-50 text-teal-700 border-teal-200"
         )}
+        onClick={() => setIsOpen(!isOpen)}
       >
-        {title} <span className="text-xs">▼</span>
+        {title}
+        {activeCount > 0 && (
+          <span className="bg-teal-600 text-white text-xs rounded-full px-2 py-0.5 min-w-[20px] h-5 flex items-center justify-center">
+            {activeCount}
+          </span>
+        )}
+        <span className={cn("text-xs transition-transform", isOpen && "rotate-180")}>▼</span>
       </Button>
-      <div className="absolute hidden group-hover:block z-10 bg-white shadow-lg rounded-md p-2 min-w-40 border">
-        {/* Option pour effacer le filtre */}
-        <button
-          onClick={() => updateFilter(filterKey, null)}
-          className={cn(
-            "block w-full text-left px-4 py-2 hover:bg-gray-100 rounded-md text-sm",
-            !filters[filterKey] && "bg-teal-50 text-teal-700"
-          )}
-        >
-          Tous
-        </button>
-        {options.map((option) => (
-          <button
-            key={option.value}
-            onClick={() => updateFilter(filterKey, option.value)}
-            className={cn(
-              "block w-full text-left px-4 py-2 hover:bg-gray-100 rounded-md text-sm",
-              isFilterActive(filterKey, option.value) && "bg-teal-50 text-teal-700"
+
+      {isOpen && (
+        <>
+          {/* Overlay pour fermer le dropdown */}
+          <div
+            className="fixed inset-0 z-10"
+            onClick={() => setIsOpen(false)}
+          />
+
+          {/* Dropdown content */}
+          <div className="absolute top-full left-0 z-20 bg-white shadow-lg rounded-md p-3 min-w-[200px] border mt-1 max-h-60 overflow-y-auto">
+            {/* Option pour effacer le filtre */}
+            {activeCount > 0 && (
+              <>
+                <button
+                  onClick={handleClearFilter}
+                  className="block w-full text-left px-3 py-2 hover:bg-gray-100 rounded-md text-sm text-red-600 font-medium"
+                >
+                  Effacer les sélections
+                </button>
+                <hr className="my-2" />
+              </>
             )}
-          >
-            {option.label}
-          </button>
-        ))}
-      </div>
+
+            {/* Options avec checkboxes */}
+            <div className="space-y-1">
+              {options.map((option) => {
+                const isSelected = isFilterActive(filterKey, option.value)
+                return (
+                  <label
+                    key={option.value}
+                    className="flex items-center gap-3 px-3 py-2 hover:bg-gray-100 rounded-md cursor-pointer text-sm"
+                  >
+                    <div className={cn(
+                      "w-4 h-4 border-2 rounded flex items-center justify-center",
+                      isSelected
+                        ? "bg-teal-600 border-teal-600"
+                        : "border-gray-300 bg-white"
+                    )}>
+                      {isSelected && (
+                        <Check className="w-3 h-3 text-white" />
+                      )}
+                    </div>
+                    <span
+                      className={cn(
+                        isSelected && "text-teal-700 font-medium"
+                      )}
+                    >
+                      {option.label}
+                    </span>
+                    <input
+                      type="checkbox"
+                      checked={isSelected}
+                      onChange={() => handleOptionToggle(option.value)}
+                      className="sr-only"
+                    />
+                  </label>
+                )
+              })}
+            </div>
+          </div>
+        </>
+      )}
     </div>
   )
 }
@@ -137,10 +196,10 @@ export function DynamicFilters({ type }: DynamicFiltersProps) {
     return (
       <div className="flex items-center justify-between w-full">
         <div className="flex space-x-4 items-center">
-          <div className="h-8 w-20 bg-gray-200 animate-pulse rounded"></div>
-          <div className="h-8 w-20 bg-gray-200 animate-pulse rounded"></div>
-          <div className="h-8 w-20 bg-gray-200 animate-pulse rounded"></div>
-          <div className="h-8 w-20 bg-gray-200 animate-pulse rounded"></div>
+          <div className="h-10 w-24 bg-gray-200 animate-pulse rounded"></div>
+          <div className="h-10 w-24 bg-gray-200 animate-pulse rounded"></div>
+          <div className="h-10 w-24 bg-gray-200 animate-pulse rounded"></div>
+          <div className="h-10 w-24 bg-gray-200 animate-pulse rounded"></div>
         </div>
       </div>
     )
@@ -169,7 +228,7 @@ export function DynamicFilters({ type }: DynamicFiltersProps) {
             onClick={clearFilters}
             className="text-red-600 border-red-200 hover:bg-red-50"
           >
-            Effacer les filtres
+            Effacer tous les filtres
           </Button>
         )}
       </div>

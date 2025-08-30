@@ -106,7 +106,7 @@ export default function FAQPage() {
                         Notre équipe support est disponible pour répondre à toutes vos questions personnalisées
                     </p>
                     <a
-                        href="/public/contact"
+                        href="/contact"
                         className="inline-flex items-center gap-2 bg-white text-teal-600 px-6 py-3 rounded-lg font-medium hover:bg-gray-50 transition-colors"
                     >
                         <MessageCircle className="h-5 w-5" />

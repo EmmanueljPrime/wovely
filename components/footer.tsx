@@ -60,12 +60,12 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
-                <Link href="/public/contact" className="text-gray-300 hover:text-teal-400 transition-colors">
+                <Link href="/contact" className="text-gray-300 hover:text-teal-400 transition-colors">
                   Contact
                 </Link>
               </li>
               <li>
-                <Link href="/public/faq" className="text-gray-300 hover:text-teal-400 transition-colors">
+                <Link href="/faq" className="text-gray-300 hover:text-teal-400 transition-colors">
                   FAQ
                 </Link>
               </li>
@@ -77,27 +77,27 @@ export default function Footer() {
             <h3 className="font-bold text-lg mb-6 text-teal-400">Légal</h3>
             <ul className="space-y-3">
               <li>
-                <Link href="/public/legal-notice" className="text-gray-300 hover:text-teal-400 transition-colors">
+                <Link href="/legal-notice" className="text-gray-300 hover:text-teal-400 transition-colors">
                   Mentions légales
                 </Link>
               </li>
               <li>
-                <Link href="/public/terms" className="text-gray-300 hover:text-teal-400 transition-colors">
+                <Link href="/terms" className="text-gray-300 hover:text-teal-400 transition-colors">
                   CGU
                 </Link>
               </li>
               <li>
-                <Link href="/public/cgv" className="text-gray-300 hover:text-teal-400 transition-colors">
+                <Link href="/cgv" className="text-gray-300 hover:text-teal-400 transition-colors">
                   CGV
                 </Link>
               </li>
               <li>
-                <Link href="/public/privacy-policy" className="text-gray-300 hover:text-teal-400 transition-colors">
+                <Link href="/privacy-policy" className="text-gray-300 hover:text-teal-400 transition-colors">
                   Confidentialité
                 </Link>
               </li>
               <li>
-                <Link href="/public/cookies" className="text-gray-300 hover:text-teal-400 transition-colors">
+                <Link href="/cookies" className="text-gray-300 hover:text-teal-400 transition-colors">
                   Cookies
                 </Link>
               </li>

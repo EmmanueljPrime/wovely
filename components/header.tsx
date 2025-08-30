@@ -78,14 +78,14 @@ export default function Header() {
 
                 <div className="flex-1 max-w-md mx-4">
                     <div className="relative">
-                        <Input
-                            type="search"
-                            placeholder="Search"
-                            className="pl-4 pr-10 py-2 rounded-full bg-gray-100"
-                            value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
-                        />
-                        <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                        {/*<Input*/}
+                        {/*    type="search"*/}
+                        {/*    placeholder="Search"*/}
+                        {/*    className="pl-4 pr-10 py-2 rounded-full bg-gray-100"*/}
+                        {/*    value={searchQuery}*/}
+                        {/*    onChange={(e) => setSearchQuery(e.target.value)}*/}
+                        {/*/>*/}
+                        {/*<Search className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />*/}
                     </div>
                 </div>
 

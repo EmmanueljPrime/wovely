@@ -146,14 +146,6 @@
             </PendingDiffInfo>
           </value>
         </entry>
-        <entry key="$PROJECT_DIR$/hooks/use-filters.ts">
-          <value>
-            <PendingDiffInfo>
-              <option name="filePath" value="$PROJECT_DIR$/hooks/use-filters.ts" />
-              <option name="updatedContent" value="&quot;use client&quot;&#10;&#10;import { useState, useEffect } from 'react'&#10;import { useRouter, useSearchParams, usePathname } from 'next/navigation'&#10;&#10;export interface FilterState {&#10;  [key: string]: string | string[]&#10;}&#10;&#10;export function useFilters(initialFilters: FilterState = {}) {&#10;  const router = useRouter()&#10;  const searchParams = useSearchParams()&#10;  const pathname = usePathname()&#10;  const [filters, setFilters] = useState&lt;FilterState&gt;(initialFilters)&#10;  const [isLoading, setIsLoading] = useState(false)&#10;&#10;  // Initialiser les filtres depuis l'URL au chargement&#10;  useEffect(() =&gt; {&#10;    const urlFilters: FilterState = {}&#10;    searchParams.forEach((value, key) =&gt; {&#10;      urlFilters[key] = value&#10;    })&#10;    setFilters(prev =&gt; ({ ...prev, ...urlFilters }))&#10;  }, [searchParams])&#10;&#10;  // Mettre à jour un filtre&#10;  const updateFilter = (key: string, value: string | null) =&gt; {&#10;    setIsLoading(true)&#10;    &#10;    const newFilters = { ...filters }&#10;    &#10;    if (value === null || value === '') {&#10;      delete newFilters[key]&#10;    } else {&#10;      newFilters[key] = value&#10;    }&#10;    &#10;    setFilters(newFilters)&#10;    &#10;    // Construire la nouvelle URL avec les paramètres&#10;    const params = new URLSearchParams()&#10;    Object.entries(newFilters).forEach(([k, v]) =&gt; {&#10;      if (v &amp;&amp; v !== '') {&#10;        params.set(k, Array.isArray(v) ? v.join(',') : v)&#10;      }&#10;    })&#10;    &#10;    const queryString = params.toString()&#10;    const newUrl = `${pathname}${queryString ? `?${queryString}` : ''}`&#10;    &#10;    // Navigation sans rechargement de page&#10;    router.replace(newUrl, { scroll: false })&#10;    &#10;    // Simuler un petit délai pour l'UX&#10;    setTimeout(() =&gt; setIsLoading(false), 200)&#10;  }&#10;&#10;  // Réinitialiser tous les filtres&#10;  const clearFilters = () =&gt; {&#10;    setFilters({})&#10;    router.replace(pathname, { scroll: false })&#10;  }&#10;&#10;  // Vérifier si un filtre est actif&#10;  const isFilterActive = (key: string, value: string) =&gt; {&#10;    return filters[key] === value&#10;  }&#10;&#10;  return {&#10;    filters,&#10;    updateFilter,&#10;    clearFilters,&#10;    isFilterActive,&#10;    isLoading&#10;  }&#10;}" />
-            </PendingDiffInfo>
-          </value>
-        </entry>
       </map>
     </option>
   </component>

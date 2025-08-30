@@ -73,16 +73,16 @@ export default function SellerSidebar() {
           </div>
 
           {/* Barre de recherche */}
-          <div className="relative mb-4">
-            <Input
-                type="search"
-                placeholder="Rechercher..."
-                className="pl-4 pr-10 py-2 text-sm"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-            />
-            <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-          </div>
+          {/*<div className="relative mb-4">*/}
+          {/*  <Input*/}
+          {/*      type="search"*/}
+          {/*      placeholder="Rechercher..."*/}
+          {/*      className="pl-4 pr-10 py-2 text-sm"*/}
+          {/*      value={searchQuery}*/}
+          {/*      onChange={(e) => setSearchQuery(e.target.value)}*/}
+          {/*  />*/}
+          {/*  <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />*/}
+          {/*</div>*/}
 
           {/* Notifications */}
           <div className="flex items-center justify-between">
