@@ -81,9 +81,28 @@ export const authOptions: NextAuthOptions = {
         console.log("JWT callback - token after:", token) // Debug
       }
 
-      // Handle session updates
-      if (trigger === "update" && session) {
-        token = { ...token, ...session }
+      // Handle session updates - récupérer les données fraîches depuis la DB
+      if (trigger === "update") {
+        try {
+          const userId = parseInt(token.sub!)
+          const freshUser = await prisma.user.findUnique({
+            where: { id: userId },
+            include: {
+              client: true,
+              seller: true,
+            },
+          })
+
+          if (freshUser) {
+            token.role = freshUser.role
+            token.createdAt = freshUser.created_at.toISOString()
+            token.client = freshUser.client
+            token.seller = freshUser.seller
+            console.log("JWT callback - fresh data loaded:", token) // Debug
+          }
+        } catch (error) {
+          console.error("Error refreshing user data:", error)
+        }
       }
 
       return token

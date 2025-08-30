@@ -296,25 +296,25 @@ export default function SellerProfile() {
                   )}
                 </div>
 
-                <div className="md:col-span-2">
-                  <Label htmlFor="description" className="text-sm font-medium text-gray-700 mb-2">
-                    Description de l'entreprise
-                  </Label>
-                  {isEditing ? (
-                    <Textarea
-                      id="description"
-                      rows={4}
-                      value={profileData.description}
-                      onChange={(e) => handleInputChange("description", e.target.value)}
-                      placeholder="Décrivez votre entreprise, vos spécialités, votre savoir-faire..."
-                      className="rounded-lg border-gray-200 focus:border-teal-500 focus:ring-teal-500 resize-none"
-                    />
-                  ) : (
-                    <div className="min-h-[100px] p-3 bg-gray-50 rounded-lg">
-                      <span className="text-gray-500">{profileData.description || "Aucune description fournie"}</span>
-                    </div>
-                  )}
-                </div>
+                {/*<div className="md:col-span-2">*/}
+                {/*  <Label htmlFor="description" className="text-sm font-medium text-gray-700 mb-2">*/}
+                {/*    Description de l'entreprise*/}
+                {/*  </Label>*/}
+                {/*  {isEditing ? (*/}
+                {/*    <Textarea*/}
+                {/*      id="description"*/}
+                {/*      rows={4}*/}
+                {/*      value={profileData.description}*/}
+                {/*      onChange={(e) => handleInputChange("description", e.target.value)}*/}
+                {/*      placeholder="Décrivez votre entreprise, vos spécialités, votre savoir-faire..."*/}
+                {/*      className="rounded-lg border-gray-200 focus:border-teal-500 focus:ring-teal-500 resize-none"*/}
+                {/*    />*/}
+                {/*  ) : (*/}
+                {/*    <div className="min-h-[100px] p-3 bg-gray-50 rounded-lg">*/}
+                {/*      <span className="text-gray-500">{profileData.description || "Aucune description fournie"}</span>*/}
+                {/*    </div>*/}
+                {/*  )}*/}
+                {/*</div>*/}
               </div>
 
               {isEditing && (

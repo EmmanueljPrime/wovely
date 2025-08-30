@@ -57,10 +57,9 @@ export async function PUT(request: NextRequest) {
     const body = await request.json()
 
     const {
-      username,
+      businessName,
       fullName,
       phoneNumber,
-      business_name,
       servicesOffered,
       yearsOfExperience,
       companyAddress,
@@ -72,46 +71,26 @@ export async function PUT(request: NextRequest) {
       companyPhoneNumber
     } = body
 
-    // Mettre à jour les informations utilisateur si nécessaire
-    if (username && username !== session.user.username) {
-      // Vérifier que le nom d'utilisateur n'est pas déjà pris
-      const existingUser = await prisma.user.findFirst({
-        where: {
-          username: username,
-          id: { not: userId }
-        }
-      })
+    // Créer l'objet de mise à jour en filtrant les valeurs undefined
+    const updateData: any = {}
 
-      if (existingUser) {
-        return NextResponse.json(
-          { error: "Ce nom d'utilisateur est déjà utilisé" },
-          { status: 400 }
-        )
-      }
+    if (businessName !== undefined) updateData.business_name = businessName
+    if (fullName !== undefined) updateData.fullName = fullName
+    if (phoneNumber !== undefined) updateData.phoneNumber = phoneNumber
+    if (servicesOffered !== undefined) updateData.servicesOffered = servicesOffered
+    if (yearsOfExperience !== undefined) updateData.yearsOfExperience = yearsOfExperience
+    if (companyAddress !== undefined) updateData.companyAddress = companyAddress
+    if (companyCity !== undefined) updateData.companyCity = companyCity
+    if (companyType !== undefined) updateData.companyType = companyType
+    if (siretNumber !== undefined) updateData.siretNumber = siretNumber
+    if (companyPostalCode !== undefined) updateData.companyPostalCode = companyPostalCode
+    if (companyCountry !== undefined) updateData.companyCountry = companyCountry
+    if (companyPhoneNumber !== undefined) updateData.companyPhoneNumber = companyPhoneNumber
 
-      await prisma.user.update({
-        where: { id: userId },
-        data: { username }
-      })
-    }
-
-    // Mettre à jour les informations vendeur (seulement les champs qui existent)
+    // Mettre à jour les informations vendeur
     const updatedSeller = await prisma.seller.update({
       where: { id: sellerId },
-      data: {
-        fullName,
-        phoneNumber,
-        business_name,
-        servicesOffered,
-        yearsOfExperience,
-        companyAddress,
-        companyCity,
-        companyType,
-        siretNumber,
-        companyPostalCode,
-        companyCountry,
-        companyPhoneNumber
-      },
+      data: updateData,
       include: {
         user: true
       }

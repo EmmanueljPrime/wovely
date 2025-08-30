@@ -7,40 +7,55 @@ export async function DELETE(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
 
-    if (!session?.user || session.user.role !== 'CLIENT') {
+    if (!session?.user || session.user.role !== 'SELLER') {
       return NextResponse.json({ message: 'Non autorisé' }, { status: 401 })
     }
 
     const userId = session.user.id
 
-    // Supprimer toutes les données liées au client
+    // Supprimer toutes les données liées au vendeur
     await prisma.$transaction(async (prisma) => {
-      // Supprimer les éléments du panier
-      await prisma.cartItem.deleteMany({
-        where: { client: { userId } }
+      // Supprimer les images des produits
+      const products = await prisma.product.findMany({
+        where: { seller: { userId } },
+        include: { images: true }
       })
 
-      // Supprimer les commandes en tant que client
-      await prisma.order.deleteMany({
-        where: { client: { userId } }
-      })
-
-      // Supprimer les projets créés par le client
-      const projects = await prisma.project.findMany({
-        where: { client: { userId } },
-        include: { proposals: true }
-      })
-
-      // Supprimer les propositions liées aux projets du client
-      for (const project of projects) {
-        await prisma.proposal.deleteMany({
-          where: { projectId: project.id }
+      for (const product of products) {
+        await prisma.image.deleteMany({
+          where: { productId: product.id }
         })
       }
 
-      // Supprimer les projets
-      await prisma.project.deleteMany({
-        where: { client: { userId } }
+      // Supprimer les éléments du panier liés aux produits du vendeur
+      await prisma.cartItem.deleteMany({
+        where: { product: { seller: { userId } } }
+      })
+
+      // Supprimer les produits
+      await prisma.product.deleteMany({
+        where: { seller: { userId } }
+      })
+
+      // Supprimer les propositions
+      await prisma.proposal.deleteMany({
+        where: { seller: { userId } }
+      })
+
+      // Supprimer les annonces
+      await prisma.advert.deleteMany({
+        where: { seller: { userId } }
+      })
+
+      // Supprimer les commandes en tant que vendeur
+      await prisma.order.deleteMany({
+        where: { seller: { userId } }
+      })
+
+      // Supprimer les projets où le vendeur est assigné
+      await prisma.project.updateMany({
+        where: { seller: { userId } },
+        data: { sellerId: null }
       })
 
       // Supprimer les messages
@@ -58,8 +73,8 @@ export async function DELETE(req: NextRequest) {
         where: { userId }
       })
 
-      // Supprimer le profil client
-      await prisma.client.delete({
+      // Supprimer le profil vendeur
+      await prisma.seller.delete({
         where: { userId }
       })
 

@@ -20,11 +20,19 @@ export async function GET(request: NextRequest) {
     const [orders, cartItems] = await Promise.all([
       // Commandes du client
       prisma.order.findMany({
-        where: { clientId }
+        where: { clientId },
+        include: {
+          product: true,
+          project: true,
+          seller: true
+        }
       }),
       // Articles dans le panier
       prisma.cartItem.findMany({
-        where: { clientId }
+        where: { clientId },
+        include: {
+          product: true
+        }
       })
     ])
 
@@ -39,7 +47,16 @@ export async function GET(request: NextRequest) {
     const stats = {
       totalOrders,
       totalSpent,
-      cartItems: cartItemsCount
+      cartItems: cartItemsCount,
+      orders: orders.map(order => ({
+        id: order.id,
+        status: order.status,
+        totalPrice: order.totalPrice,
+        created_at: order.created_at,
+        product: order.product,
+        project: order.project,
+        seller: order.seller
+      }))
     }
 
     return NextResponse.json(stats)
