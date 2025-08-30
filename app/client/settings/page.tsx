@@ -2,7 +2,7 @@
 
 import { useRequireRole } from "@/hooks/use-auth"
 import { useState, useEffect } from "react"
-import { useSession } from "next-auth/react"
+import { useSession, signOut } from "next-auth/react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -31,7 +31,9 @@ import {
   Edit3,
   X,
   MapPin,
-  Home
+  Home,
+  Eye,
+  EyeOff
 } from "lucide-react"
 
 export default function ClientAccountSettings() {
@@ -41,6 +43,10 @@ export default function ClientAccountSettings() {
   const [isUpdating, setIsUpdating] = useState(false)
   const [isChangingPassword, setIsChangingPassword] = useState(false)
   const [isDeletingAccount, setIsDeletingAccount] = useState(false)
+
+  // États pour la visibilité des mots de passe
+  const [showNewPassword, setShowNewPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
 
   // État pour les formulaires
   const [profileData, setProfileData] = useState({
@@ -152,6 +158,8 @@ export default function ClientAccountSettings() {
 
       if (response.ok) {
         console.log('Compte supprimé avec succès')
+        // Déconnecter l'utilisateur avant la redirection
+        await signOut({ redirect: false })
         // Redirection vers la page d'accueil
         window.location.href = '/'
       } else {
@@ -410,30 +418,54 @@ export default function ClientAccountSettings() {
                   <Label htmlFor="newPassword" className="text-sm font-medium text-gray-700 mb-2">
                     Nouveau mot de passe *
                   </Label>
-                  <Input
-                    id="newPassword"
-                    type="password"
-                    value={passwordData.newPassword}
-                    onChange={(e) => setPasswordData({...passwordData, newPassword: e.target.value})}
-                    placeholder="Entrez votre nouveau mot de passe"
-                    className="h-12 rounded-lg border-gray-200 focus:border-teal-500 focus:ring-teal-500"
-                    required
-                  />
+                  <div className="relative">
+                    <Input
+                      id="newPassword"
+                      type={showNewPassword ? "text" : "password"}
+                      value={passwordData.newPassword}
+                      onChange={(e) => setPasswordData({...passwordData, newPassword: e.target.value})}
+                      placeholder="Entrez votre nouveau mot de passe"
+                      className="h-12 rounded-lg border-gray-200 focus:border-teal-500 focus:ring-teal-500 pr-12"
+                      required
+                    />
+                    <div
+                      className="absolute inset-y-0 right-0 flex items-center pr-3 cursor-pointer"
+                      onClick={() => setShowNewPassword(!showNewPassword)}
+                    >
+                      {showNewPassword ? (
+                        <EyeOff className="h-5 w-5 text-gray-400" />
+                      ) : (
+                        <Eye className="h-5 w-5 text-gray-400" />
+                      )}
+                    </div>
+                  </div>
                 </div>
 
                 <div>
                   <Label htmlFor="confirmPassword" className="text-sm font-medium text-gray-700 mb-2">
                     Confirmer le nouveau mot de passe *
                   </Label>
-                  <Input
-                    id="confirmPassword"
-                    type="password"
-                    value={passwordData.confirmPassword}
-                    onChange={(e) => setPasswordData({...passwordData, confirmPassword: e.target.value})}
-                    placeholder="Confirmez votre nouveau mot de passe"
-                    className="h-12 rounded-lg border-gray-200 focus:border-teal-500 focus:ring-teal-500"
-                    required
-                  />
+                  <div className="relative">
+                    <Input
+                      id="confirmPassword"
+                      type={showConfirmPassword ? "text" : "password"}
+                      value={passwordData.confirmPassword}
+                      onChange={(e) => setPasswordData({...passwordData, confirmPassword: e.target.value})}
+                      placeholder="Confirmez votre nouveau mot de passe"
+                      className="h-12 rounded-lg border-gray-200 focus:border-teal-500 focus:ring-teal-500 pr-12"
+                      required
+                    />
+                    <div
+                      className="absolute inset-y-0 right-0 flex items-center pr-3 cursor-pointer"
+                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    >
+                      {showConfirmPassword ? (
+                        <EyeOff className="h-5 w-5 text-gray-400" />
+                      ) : (
+                        <Eye className="h-5 w-5 text-gray-400" />
+                      )}
+                    </div>
+                  </div>
                 </div>
 
                 <Button

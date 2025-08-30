@@ -11,39 +11,56 @@ export async function DELETE(req: NextRequest) {
       return NextResponse.json({ message: 'Non autorisé' }, { status: 401 })
     }
 
-    const userId = session.user.id
+    const userId = parseInt(session.user.id)
 
     // Supprimer toutes les données liées au client
     await prisma.$transaction(async (prisma) => {
-      // Supprimer les éléments du panier
+      // 1. Récupérer toutes les commandes du client pour la suppression en cascade
+      const orders = await prisma.order.findMany({
+        where: { client: { userId } },
+        select: { id: true }
+      })
+
+      const orderIds = orders.map(o => o.id)
+
+      if (orderIds.length > 0) {
+        // 2. Supprimer les éléments de commande
+        await prisma.orderItem.deleteMany({
+          where: { orderId: { in: orderIds } }
+        })
+      }
+
+      // 3. Supprimer les éléments du panier
       await prisma.cartItem.deleteMany({
         where: { client: { userId } }
       })
 
-      // Supprimer les commandes en tant que client
+      // 4. Supprimer les commandes en tant que client
       await prisma.order.deleteMany({
         where: { client: { userId } }
       })
 
-      // Supprimer les projets créés par le client
+      // 5. Supprimer les projets créés par le client
       const projects = await prisma.project.findMany({
         where: { client: { userId } },
-        include: { proposals: true }
+        select: { id: true }
       })
 
-      // Supprimer les propositions liées aux projets du client
-      for (const project of projects) {
+      const projectIds = projects.map(p => p.id)
+
+      if (projectIds.length > 0) {
+        // 6. Supprimer les propositions liées aux projets du client
         await prisma.proposal.deleteMany({
-          where: { projectId: project.id }
+          where: { projectId: { in: projectIds } }
         })
       }
 
-      // Supprimer les projets
+      // 7. Supprimer les projets
       await prisma.project.deleteMany({
         where: { client: { userId } }
       })
 
-      // Supprimer les messages
+      // 8. Supprimer les messages
       await prisma.message.deleteMany({
         where: {
           OR: [
@@ -53,27 +70,27 @@ export async function DELETE(req: NextRequest) {
         }
       })
 
-      // Supprimer les notifications
+      // 9. Supprimer les notifications
       await prisma.notification.deleteMany({
         where: { userId }
       })
 
-      // Supprimer le profil client
+      // 10. Supprimer le profil client
       await prisma.client.delete({
         where: { userId }
       })
 
-      // Supprimer les comptes liés (OAuth)
+      // 11. Supprimer les comptes liés (OAuth)
       await prisma.account.deleteMany({
         where: { userId }
       })
 
-      // Supprimer les sessions
+      // 12. Supprimer les sessions
       await prisma.session.deleteMany({
         where: { userId }
       })
 
-      // Finalement, supprimer l'utilisateur
+      // 13. Finalement, supprimer l'utilisateur
       await prisma.user.delete({
         where: { id: userId }
       })

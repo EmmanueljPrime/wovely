@@ -22,7 +22,7 @@ export async function PUT(req: NextRequest) {
 
     // Récupérer l'utilisateur avec son mot de passe
     const user = await prisma.user.findUnique({
-      where: { id: session.user.id }
+      where: { id: parseInt(session.user.id) }
     })
 
     if (!user || !user.password) {
@@ -45,7 +45,7 @@ export async function PUT(req: NextRequest) {
 
     // Mettre à jour le mot de passe
     await prisma.user.update({
-      where: { id: session.user.id },
+      where: { id: parseInt(session.user.id) },
       data: { password: hashedNewPassword }
     })
 

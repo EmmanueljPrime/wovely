@@ -2,7 +2,7 @@
 
 import { useRequireRole } from "@/hooks/use-auth"
 import { useState, useEffect } from "react"
-import { useSession } from "next-auth/react"
+import { useSession, signOut } from "next-auth/react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -36,7 +36,9 @@ import {
   MapPin,
   FileText,
   Clock,
-  Briefcase
+  Briefcase,
+  Eye,
+  EyeOff
 } from "lucide-react"
 
 export default function SellerAccountSettings() {
@@ -46,6 +48,10 @@ export default function SellerAccountSettings() {
   const [isUpdating, setIsUpdating] = useState(false)
   const [isChangingPassword, setIsChangingPassword] = useState(false)
   const [isDeletingAccount, setIsDeletingAccount] = useState(false)
+
+  // États pour la visibilité des mots de passe
+  const [showNewPassword, setShowNewPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
 
   // État pour les formulaires
   const [profileData, setProfileData] = useState({
@@ -70,11 +76,34 @@ export default function SellerAccountSettings() {
     confirmPassword: ""
   })
 
+  // Effet pour initialiser les données du formulaire quand user change
+  useEffect(() => {
+    if (user?.seller) {
+      setProfileData({
+        businessName: user.seller.business_name || "",
+        fullName: user.seller.fullName || "",
+        phoneNumber: user.seller.phoneNumber || "",
+        servicesOffered: user.seller.servicesOffered || "",
+        yearsOfExperience: user.seller.yearsOfExperience || "",
+        // Champs pro
+        companyType: user.seller.companyType || "",
+        siretNumber: user.seller.siretNumber || "",
+        companyAddress: user.seller.companyAddress || "",
+        companyCity: user.seller.companyCity || "",
+        companyPostalCode: user.seller.companyPostalCode || "",
+        companyCountry: user.seller.companyCountry || "",
+        companyPhoneNumber: user.seller.companyPhoneNumber || ""
+      })
+    }
+  }, [user])
+
   const handleProfileUpdate = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsUpdating(true)
 
     try {
+      console.log('Données envoyées:', profileData) // Debug
+
       const response = await fetch('/api/seller/profile', {
         method: 'PUT',
         headers: {
@@ -83,15 +112,22 @@ export default function SellerAccountSettings() {
         body: JSON.stringify(profileData),
       })
 
+      const result = await response.json()
+      console.log('Réponse API:', result) // Debug
+
       if (response.ok) {
+        // Forcer la mise à jour de la session NextAuth
+        await update()
+
         setIsEditing(false)
-        window.location.reload()
+
+        // Plus de rechargement nécessaire grâce à la correction NextAuth !
       } else {
-        const error = await response.json()
-        console.error('Erreur lors de la mise à jour:', error.message || "Erreur lors de la mise à jour")
+        console.error('Erreur lors de la mise à jour:', result.error || "Erreur lors de la mise à jour")
       }
     } catch (error) {
-      console.error('Erreur de connexion:', error)
+      console.error('Erreur:', error) // Debug
+      console.error('Erreur de connexion')
     } finally {
       setIsUpdating(false)
     }
@@ -143,6 +179,8 @@ export default function SellerAccountSettings() {
 
       if (response.ok) {
         console.log('Compte supprimé avec succès')
+        // Déconnecter l'utilisateur avant la redirection
+        await signOut({ redirect: false })
         // Redirection vers la page d'accueil
         window.location.href = '/'
       } else {
@@ -541,30 +579,56 @@ export default function SellerAccountSettings() {
                   <Label htmlFor="newPassword" className="text-sm font-medium text-gray-700 mb-2">
                     Nouveau mot de passe *
                   </Label>
-                  <Input
-                    id="newPassword"
-                    type="password"
-                    value={passwordData.newPassword}
-                    onChange={(e) => setPasswordData({...passwordData, newPassword: e.target.value})}
-                    placeholder="Entrez votre nouveau mot de passe"
-                    className="h-12 rounded-lg border-gray-200 focus:border-teal-500 focus:ring-teal-500"
-                    required
-                  />
+                  <div className="relative">
+                    <Input
+                      id="newPassword"
+                      type={showNewPassword ? "text" : "password"}
+                      value={passwordData.newPassword}
+                      onChange={(e) => setPasswordData({...passwordData, newPassword: e.target.value})}
+                      placeholder="Entrez votre nouveau mot de passe"
+                      className="h-12 rounded-lg border-gray-200 focus:border-teal-500 focus:ring-teal-500"
+                      required
+                    />
+                    <button
+                      type="button"
+                      className="absolute inset-y-0 right-0 flex items-center pr-3"
+                      onClick={() => setShowNewPassword(!showNewPassword)}
+                    >
+                      {showNewPassword ? (
+                        <EyeOff className="h-5 w-5 text-gray-400 hover:text-gray-600" />
+                      ) : (
+                        <Eye className="h-5 w-5 text-gray-400 hover:text-gray-600" />
+                      )}
+                    </button>
+                  </div>
                 </div>
 
                 <div>
                   <Label htmlFor="confirmPassword" className="text-sm font-medium text-gray-700 mb-2">
                     Confirmer le nouveau mot de passe *
                   </Label>
-                  <Input
-                    id="confirmPassword"
-                    type="password"
-                    value={passwordData.confirmPassword}
-                    onChange={(e) => setPasswordData({...passwordData, confirmPassword: e.target.value})}
-                    placeholder="Confirmez votre nouveau mot de passe"
-                    className="h-12 rounded-lg border-gray-200 focus:border-teal-500 focus:ring-teal-500"
-                    required
-                  />
+                  <div className="relative">
+                    <Input
+                      id="confirmPassword"
+                      type={showConfirmPassword ? "text" : "password"}
+                      value={passwordData.confirmPassword}
+                      onChange={(e) => setPasswordData({...passwordData, confirmPassword: e.target.value})}
+                      placeholder="Confirmez votre nouveau mot de passe"
+                      className="h-12 rounded-lg border-gray-200 focus:border-teal-500 focus:ring-teal-500"
+                      required
+                    />
+                    <button
+                      type="button"
+                      className="absolute inset-y-0 right-0 flex items-center pr-3"
+                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    >
+                      {showConfirmPassword ? (
+                        <EyeOff className="h-5 w-5 text-gray-400 hover:text-gray-600" />
+                      ) : (
+                        <Eye className="h-5 w-5 text-gray-400 hover:text-gray-600" />
+                      )}
+                    </button>
+                  </div>
                 </div>
 
                 <Button
@@ -629,7 +693,7 @@ export default function SellerAccountSettings() {
             <div className="bg-red-50 p-6 rounded-lg border border-red-200">
               <h4 className="font-semibold text-red-900 mb-2">Supprimer le compte</h4>
               <p className="text-sm text-red-700 mb-4">
-                Une fois votre compte supprimé, il n'y a pas de retour en arrière possible. Toutes vos données, produits et commandes seront définitivement perdus.
+                Une fois votre compte supprimé, il n'y a pas de retour en arrière possible. Toutes vos données, produits et commandes seront définitivement perdues.
               </p>
 
               <AlertDialog>
