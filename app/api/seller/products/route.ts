@@ -44,9 +44,12 @@ export async function GET(request: NextRequest) {
         images: true,
         category: true,
         material: true,
-        size: true,
         color: true,
-        stockBySize: true
+        stockBySize: {
+          include: {
+            size: true
+          }
+        }
       },
       orderBy: {
         created_at: 'desc'

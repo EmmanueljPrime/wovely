@@ -37,12 +37,11 @@ interface ProductFormData {
   name: string
   description: string
   price: string
-  stock: string
   categoryId: string
   materialId: string
-  sizeId: string
   colorId: string
   images: File[]
+  stockBySizes: { [sizeId: string]: number } // Nouvelle structure pour les stocks par taille
 }
 
 export default function CreateProductPage() {
@@ -59,12 +58,11 @@ export default function CreateProductPage() {
     name: "",
     description: "",
     price: "",
-    stock: "",
     categoryId: "",
     materialId: "",
-    sizeId: "",
     colorId: "",
-    images: []
+    images: [],
+    stockBySizes: {} // Initialiser avec un objet vide
   })
 
   // Charger les données de référence
@@ -111,6 +109,29 @@ export default function CreateProductPage() {
       }
       console.log('FormData mis à jour:', newData)
       return newData
+    })
+  }
+
+  // Nouvelle fonction pour gérer les stocks par taille
+  const handleStockChange = (sizeId: string, quantity: number) => {
+    setFormData(prev => ({
+      ...prev,
+      stockBySizes: {
+        ...prev.stockBySizes,
+        [sizeId]: quantity
+      }
+    }))
+  }
+
+  // Fonction pour supprimer un stock par taille
+  const removeStockForSize = (sizeId: string) => {
+    setFormData(prev => {
+      const newStockBySizes = { ...prev.stockBySizes }
+      delete newStockBySizes[sizeId]
+      return {
+        ...prev,
+        stockBySizes: newStockBySizes
+      }
     })
   }
 
@@ -214,10 +235,19 @@ export default function CreateProductPage() {
       return
     }
 
-    if (!formData.categoryId || !formData.materialId || !formData.sizeId || !formData.colorId) {
+    if (!formData.categoryId || !formData.materialId || !formData.colorId) {
       toast({
         title: "Erreur",
         description: "Veuillez sélectionner toutes les propriétés du produit",
+        variant: "destructive"
+      })
+      return
+    }
+
+    if (Object.keys(formData.stockBySizes).length === 0) {
+      toast({
+        title: "Erreur",
+        description: "Veuillez configurer au moins un stock pour une taille",
         variant: "destructive"
       })
       return
@@ -240,11 +270,12 @@ export default function CreateProductPage() {
       submitFormData.append('name', formData.name)
       submitFormData.append('description', formData.description)
       submitFormData.append('price', formData.price)
-      submitFormData.append('stock', formData.stock || '0')
       submitFormData.append('categoryId', formData.categoryId)
       submitFormData.append('materialId', formData.materialId)
-      submitFormData.append('sizeId', formData.sizeId)
       submitFormData.append('colorId', formData.colorId)
+
+      // Ajouter les stocks par taille
+      submitFormData.append('stockBySizes', JSON.stringify(formData.stockBySizes))
 
       // Ajouter les images
       formData.images.forEach((image, index) => {
@@ -337,18 +368,6 @@ export default function CreateProductPage() {
               />
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="stock">Stock disponible</Label>
-              <Input
-                id="stock"
-                type="number"
-                min="0"
-                value={formData.stock}
-                onChange={(e) => handleInputChange('stock', e.target.value)}
-                placeholder="10"
-              />
-            </div>
-
             {/* Propriétés du produit */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
@@ -384,22 +403,6 @@ export default function CreateProductPage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="size">Taille *</Label>
-                <Select value={formData.sizeId} onValueChange={(value) => handleInputChange('sizeId', value)}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Sélectionner une taille" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {sizes.map((size) => (
-                      <SelectItem key={size.id} value={size.id.toString()}>
-                        {size.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
                 <Label htmlFor="color">Couleur *</Label>
                 <Select value={formData.colorId} onValueChange={(value) => handleInputChange('colorId', value)}>
                   <SelectTrigger>
@@ -413,6 +416,88 @@ export default function CreateProductPage() {
                     ))}
                   </SelectContent>
                 </Select>
+              </div>
+            </div>
+
+            {/* Gestion des stocks par taille */}
+            <div className="space-y-4">
+              <Label>Stock par taille *</Label>
+              <div className="bg-gray-50 p-4 rounded-lg space-y-4">
+
+                {/* Stocks déjà configurés */}
+                {Object.entries(formData.stockBySizes).length > 0 && (
+                  <div className="space-y-3">
+                    <h4 className="font-medium text-sm">Stocks configurés :</h4>
+                    {Object.entries(formData.stockBySizes).map(([sizeId, quantity]) => {
+                      const size = sizes.find(s => s.id.toString() === sizeId)
+                      return (
+                        <div key={sizeId} className="flex items-center gap-4 bg-white p-3 rounded-md">
+                          <span className="font-medium min-w-[60px]">
+                            {size?.name || 'Taille inconnue'}
+                          </span>
+                          <Input
+                            type="number"
+                            min="0"
+                            value={quantity}
+                            onChange={(e) => handleStockChange(sizeId, parseInt(e.target.value) || 0)}
+                            className="w-24"
+                            placeholder="0"
+                          />
+                          <span className="text-sm text-gray-500">pièces</span>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => removeStockForSize(sizeId)}
+                            className="text-red-500 hover:text-red-700"
+                          >
+                            <X className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      )
+                    })}
+                  </div>
+                )}
+
+                {/* Ajouter une nouvelle taille */}
+                <div className="border-t pt-4">
+                  <h4 className="font-medium text-sm mb-3">Ajouter du stock pour une taille :</h4>
+                  <div className="flex items-center gap-4">
+                    <Select
+                      value=""
+                      onValueChange={(sizeId) => {
+                        if (sizeId && !formData.stockBySizes[sizeId]) {
+                          handleStockChange(sizeId, 0)
+                        }
+                      }}
+                    >
+                      <SelectTrigger className="w-32">
+                        <SelectValue placeholder="Taille" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {sizes
+                          .filter(size => !formData.stockBySizes[size.id.toString()])
+                          .map((size) => (
+                            <SelectItem key={size.id} value={size.id.toString()}>
+                              {size.name}
+                            </SelectItem>
+                          ))}
+                      </SelectContent>
+                    </Select>
+                    <span className="text-sm text-gray-500">
+                      {sizes.filter(size => !formData.stockBySizes[size.id.toString()]).length === 0
+                        ? "Toutes les tailles sont configurées"
+                        : "Sélectionnez une taille pour ajouter du stock"}
+                    </span>
+                  </div>
+                </div>
+
+                {Object.keys(formData.stockBySizes).length === 0 && (
+                  <div className="text-center py-4 text-gray-500">
+                    <p className="text-sm">Aucun stock configuré</p>
+                    <p className="text-xs">Sélectionnez une taille ci-dessus pour commencer</p>
+                  </div>
+                )}
               </div>
             </div>
 

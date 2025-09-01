@@ -57,7 +57,7 @@ export async function GET(request: NextRequest) {
             }))
         })
 
-        // Maintenant recherchons avec différents statuts possibles
+        // Recherches avec différents statuts possibles
         console.log("🔍 API AVAILABLE: Recherche avec différents statuts...")
 
         // Test avec "OPEN"

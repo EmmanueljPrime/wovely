@@ -28,6 +28,7 @@ type Proposal = {
     message: string
     sellerName: string
     sellerId: number
+    sellerEmail?: string | null
 }
 
 export default function ClientProjects() {

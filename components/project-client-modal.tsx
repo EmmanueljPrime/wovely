@@ -22,6 +22,7 @@ type Proposal = {
     message: string
     sellerName: string
     sellerId: number
+    sellerEmail?: string | null
     status: string
     created_at: string
 }
@@ -168,10 +169,12 @@ export default function ProjectProposalsModal({
                 {/* Informations importantes sur le paiement manuel */}
                 {hasAcceptedProposal && (
                     <Alert className="bg-blue-50 border-blue-200">
-                        <Info className="h-4 w-4 text-blue-600" />
                         <AlertDescription className="text-blue-800">
                             <strong>Information importante :</strong> Pour les projets sur-mesure, le paiement se fait directement avec le vendeur.
                             Vous pourrez organiser le paiement par virement, PayPal ou tout autre moyen convenu ensemble.
+                            <br /><br />
+                            <strong>⚠️ Avertissement :</strong> Wovely se désengage de tout problème lié au paiement des projets car les transactions se font en dehors de notre plateforme.
+                            Soyez vigilant face aux tentatives d'escroquerie et vérifiez toujours l'identité du vendeur avant d'effectuer un paiement.
                         </AlertDescription>
                     </Alert>
                 )}
@@ -287,7 +290,14 @@ export default function ProjectProposalsModal({
                                                             <div className="space-y-2 text-sm">
                                                                 <div className="flex items-center gap-2 text-gray-700">
                                                                     <Mail className="h-3 w-3" />
-                                                                    <span>Contactez le vendeur par message privé</span>
+                                                                    <span>
+                                                                        Contactez le vendeur par message privé
+                                                                        {proposal.sellerEmail && (
+                                                                            <span className="font-medium text-teal-600 ml-1">
+                                                                                ({proposal.sellerEmail})
+                                                                            </span>
+                                                                        )}
+                                                                    </span>
                                                                 </div>
                                                                 <div className="flex items-center gap-2 text-gray-700">
                                                                     <CreditCard className="h-3 w-3" />

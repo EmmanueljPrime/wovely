@@ -207,7 +207,6 @@ exports.Prisma.ProductScalarFieldEnum = {
   updated_at: 'updated_at',
   sellerId: 'sellerId',
   categoryId: 'categoryId',
-  sizeId: 'sizeId',
   colorId: 'colorId',
   materialId: 'materialId'
 };

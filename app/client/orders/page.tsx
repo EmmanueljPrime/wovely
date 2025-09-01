@@ -17,9 +17,10 @@ interface Order {
   totalPrice: number
   status: string
   paymentStatus: string
+  type: string
   created_at: string
   updated_at: string
-  product: {
+  product?: {
     id: number
     name: string
     price: number
@@ -29,6 +30,17 @@ interface Order {
       user: {
         username: string
       }
+    }
+  }
+  project?: {
+    id: number
+    title: string
+    description: string
+  }
+  seller: {
+    business_name: string
+    user: {
+      username: string
     }
   }
 }
@@ -242,8 +254,8 @@ export default function ClientOrders() {
                   <div className="flex-shrink-0">
                     <div className="w-24 h-24 bg-gray-100 rounded-lg overflow-hidden">
                       <Image
-                        src={order.product.images[0]?.url || "/placeholder.svg"}
-                        alt={order.product.name}
+                        src={order.product?.images[0]?.url || "/placeholder.svg"}
+                        alt={order.product?.name}
                         width={96}
                         height={96}
                         className="w-full h-full object-cover"
@@ -254,22 +266,33 @@ export default function ClientOrders() {
                   {/* Détails du produit */}
                   <div className="flex-1 min-w-0">
                     <h3 className="font-semibold text-gray-900 mb-2">
-                      {order.product.name}
+                      {order.product ? order.product.name : order.project?.title}
                     </h3>
 
                     <div className="space-y-1 text-sm text-gray-600">
-                      <div className="flex items-center gap-2">
-                        <User className="h-4 w-4" />
-                        <span>Vendeur: {order.product.seller.business_name}</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Package className="h-4 w-4" />
-                        <span>Quantité: {order.quantity}</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Euro className="h-4 w-4" />
-                        <span>Prix unitaire: {formatPrice(Number(order.product.price))} €</span>
-                      </div>
+                      {order.product && (
+                        <>
+                          <div className="flex items-center gap-2">
+                            <User className="h-4 w-4" />
+                            <span>Vendeur: {order.product.seller.business_name}</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Package className="h-4 w-4" />
+                            <span>Quantité: {order.quantity}</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Euro className="h-4 w-4" />
+                            <span>Prix unitaire: {formatPrice(Number(order.product.price))} €</span>
+                          </div>
+                        </>
+                      )}
+
+                      {order.project && (
+                        <div className="text-gray-700">
+                          <p className="font-medium">Projet: {order.project.title}</p>
+                          <p className="text-sm">{order.project.description}</p>
+                        </div>
+                      )}
                     </div>
                   </div>
 
@@ -291,14 +314,30 @@ export default function ClientOrders() {
                   </div>
 
                   <div className="flex gap-3">
-                    <Link href={`/product/${order.product.id}`}>
-                      <Button variant="outline" size="sm">
-                        Voir le produit
+                    <Link href={`/client/orders/${order.id}`}>
+                      <Button variant="default" size="sm" className="bg-teal-600 hover:bg-teal-700">
+                        Voir détails
                       </Button>
                     </Link>
 
+                    {order.product && (
+                      <Link href={`/product/${order.product.id}`}>
+                        <Button variant="outline" size="sm">
+                          Voir le produit
+                        </Button>
+                      </Link>
+                    )}
+
+                    {order.project && (
+                      <Link href={`/project/${order.project.id}`}>
+                        <Button variant="outline" size="sm">
+                          Voir le projet
+                        </Button>
+                      </Link>
+                    )}
+
                     {order.status === 'delivered' && (
-                      <Button size="sm" className="bg-teal-600 hover:bg-teal-700">
+                      <Button size="sm" variant="outline" className="text-teal-600 border-teal-200 hover:bg-teal-50">
                         Laisser un avis
                       </Button>
                     )}

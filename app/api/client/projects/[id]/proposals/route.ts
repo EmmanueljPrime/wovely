@@ -53,6 +53,7 @@ export async function GET(_: NextRequest, { params }: { params: Promise<{ id: st
             status: p.status,
             sellerId: p.sellerId,
             sellerName: p.seller?.business_name || p.seller?.fullName || p.seller?.user?.username || "Vendeur inconnu",
+            sellerEmail: p.seller?.user?.email || null,
             created_at: p.created_at.toISOString(),
             updated_at: p.updated_at?.toISOString()
         }))

@@ -54,7 +54,7 @@ export async function PUT(
       )
     }
 
-    // Mettre à jour le statut de la proposition
+    // Refuser la proposition
     await prisma.proposal.update({
       where: { id: proposalId },
       data: { status: "rejected" }

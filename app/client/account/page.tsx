@@ -28,19 +28,36 @@ import Image from "next/image"
 
 interface Order {
   id: number
-  created_at: string
+  quantity: number
+  totalPrice: number
   status: string
-  total: number
-  items: {
+  paymentStatus: string
+  type: string
+  created_at: string
+  updated_at: string
+  product?: {
     id: number
-    quantity: number
+    name: string
     price: number
-    product: {
-      id: number
-      name: string
-      images: { url: string }[]
+    images: { id: number; url: string }[]
+    seller: {
+      business_name: string
+      user: {
+        username: string
+      }
     }
-  }[]
+  }
+  project?: {
+    id: number
+    title: string
+    description: string
+  }
+  seller: {
+    business_name: string
+    user: {
+      username: string
+    }
+  }
 }
 
 export default function ClientAccountPage() {
@@ -65,7 +82,7 @@ export default function ClientAccountPage() {
       const res = await fetch("/api/client/orders")
       if (!res.ok) throw new Error("Erreur lors du chargement des commandes")
       const data = await res.json()
-      setOrders(data.slice(0, 3)) // Prendre seulement les 3 dernières
+      setOrders(data.orders?.slice(0, 3) || []) // Corriger pour utiliser data.orders
     } catch (err) {
       console.error("Erreur de chargement des commandes :", err)
       toast({
@@ -78,10 +95,25 @@ export default function ClientAccountPage() {
 
   const fetchStats = async () => {
     try {
-      const res = await fetch("/api/client/stats")
-      if (!res.ok) throw new Error("Erreur lors du chargement des statistiques")
-      const data = await res.json()
-      setStats(data)
+      // Calculer les stats depuis les commandes au lieu d'une API séparée
+      const res = await fetch("/api/client/orders")
+      if (res.ok) {
+        const data = await res.json()
+        const orders = data.orders || []
+
+        const cartRes = await fetch("/api/cart")
+        let cartItems = 0
+        if (cartRes.ok) {
+          const cartData = await cartRes.json()
+          cartItems = cartData.items?.length || 0
+        }
+
+        setStats({
+          totalOrders: orders.length,
+          totalSpent: orders.reduce((sum: number, order: Order) => sum + Number(order.totalPrice), 0),
+          cartItems: cartItems
+        })
+      }
     } catch (err) {
       console.error("Erreur de chargement des statistiques :", err)
     } finally {
@@ -201,7 +233,7 @@ export default function ClientAccountPage() {
             <div className="space-y-4">
               {orders.map((order) => {
                 const statusInfo = getStatusInfo(order.status)
-                const totalItems = order.items.reduce((sum, item) => sum + item.quantity, 0)
+                const totalItems = order.quantity
 
                 return (
                   <Card key={order.id} className="hover:shadow-lg transition-shadow duration-200">
@@ -229,7 +261,7 @@ export default function ClientAccountPage() {
                           </Badge>
                           <div className="text-right">
                             <p className="text-2xl font-bold text-teal-600">
-                              {formatPrice(order.total)}
+                              {formatPrice(order.totalPrice)}
                             </p>
                             <p className="text-gray-600 text-sm">
                               {totalItems} article{totalItems > 1 ? "s" : ""}
@@ -240,40 +272,56 @@ export default function ClientAccountPage() {
 
                       {/* Order Items Preview */}
                       <div className="flex items-center space-x-4 mb-4">
-                        <div className="flex space-x-2">
-                          {order.items.slice(0, 3).map((item, index) => (
-                            <div key={index} className="relative">
-                              <Image
-                                src={item.product.images[0]?.url || "/placeholder.jpg"}
-                                alt={item.product.name}
-                                width={60}
-                                height={60}
-                                className="rounded-lg object-cover border"
-                              />
-                              {item.quantity > 1 && (
-                                <div className="absolute -top-2 -right-2 bg-teal-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                                  {item.quantity}
-                                </div>
-                              )}
+                        {order.product && (
+                          <>
+                            <div className="flex space-x-2">
+                              <div className="relative">
+                                <Image
+                                  src={order.product.images[0]?.url || "/placeholder.jpg"}
+                                  alt={order.product.name}
+                                  width={60}
+                                  height={60}
+                                  className="rounded-lg object-cover border"
+                                />
+                                {order.quantity > 1 && (
+                                  <div className="absolute -top-2 -right-2 bg-teal-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                                    {order.quantity}
+                                  </div>
+                                )}
+                              </div>
                             </div>
-                          ))}
-                          {order.items.length > 3 && (
-                            <div className="w-15 h-15 bg-gray-100 rounded-lg flex items-center justify-center text-gray-600 text-sm">
-                              +{order.items.length - 3}
+                            <div className="flex-1">
+                              <p className="text-gray-700">
+                                {order.product.name}
+                              </p>
+                              <p className="text-sm text-gray-500">
+                                Vendu par {order.seller.business_name}
+                              </p>
                             </div>
-                          )}
-                        </div>
+                          </>
+                        )}
 
-                        <div className="flex-1">
-                          <p className="text-gray-700">
-                            {order.items[0].product.name}
-                            {order.items.length > 1 && ` et ${order.items.length - 1} autre${order.items.length > 2 ? "s" : ""} article${order.items.length > 2 ? "s" : ""}`}
-                          </p>
-                        </div>
+                        {order.project && (
+                          <>
+                            <div className="flex space-x-2">
+                              <div className="w-15 h-15 bg-teal-100 rounded-lg flex items-center justify-center">
+                                <Package className="h-8 w-8 text-teal-600" />
+                              </div>
+                            </div>
+                            <div className="flex-1">
+                              <p className="text-gray-700">
+                                {order.project.title}
+                              </p>
+                              <p className="text-sm text-gray-500">
+                                Projet sur-mesure par {order.seller.business_name}
+                              </p>
+                            </div>
+                          </>
+                        )}
                       </div>
 
                       <div className="flex justify-end">
-                        <Link href={`/orders/${order.id}`}>
+                        <Link href={`/client/orders/${order.id}`}>
                           <Button variant="outline" size="sm" className="text-teal-600 border-teal-600 hover:bg-teal-50">
                             <Eye className="h-4 w-4 mr-2" />
                             Voir les détails

@@ -45,6 +45,11 @@ export async function GET() {
               include: {
                 user: true
               }
+            },
+            stockBySize: {
+              include: {
+                size: true
+              }
             }
           }
         },

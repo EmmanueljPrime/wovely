@@ -234,22 +234,22 @@ export function DynamicFilters({ type }: DynamicFiltersProps) {
       </div>
 
       <div className="flex space-x-2">
-        <Link href="/">
-          <Button
-            variant={type === 'products' ? 'default' : 'outline'}
-            className="rounded-full"
-          >
-            Rechercher des produits
-          </Button>
-        </Link>
-        <Link href="/tailor">
-          <Button
-            variant={type === 'tailors' ? 'default' : 'outline'}
-            className="rounded-full"
-          >
-            Rechercher des tailleurs
-          </Button>
-        </Link>
+        {/*<Link href="/">*/}
+        {/*  <Button*/}
+        {/*    variant={type === 'products' ? 'default' : 'outline'}*/}
+        {/*    className="rounded-full"*/}
+        {/*  >*/}
+        {/*    Rechercher des produits*/}
+        {/*  </Button>*/}
+        {/*</Link>*/}
+        {/*<Link href="/tailor">*/}
+        {/*  <Button*/}
+        {/*    variant={type === 'tailors' ? 'default' : 'outline'}*/}
+        {/*    className="rounded-full"*/}
+        {/*  >*/}
+        {/*    Rechercher des tailleurs*/}
+        {/*  </Button>*/}
+        {/*</Link>*/}
       </div>
     </div>
   )

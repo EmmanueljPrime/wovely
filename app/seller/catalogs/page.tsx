@@ -46,9 +46,12 @@ interface Product {
   images: { id: number; url: string }[]
   category: { id: string; name: string } | null
   material: { id: string; name: string } | null
-  size: { id: string; name: string } | null
   color: { id: string; name: string } | null
-  stockBySize: { quantity: number }[]
+  stockBySize: {
+    id: number
+    quantity: number
+    size: { id: string; name: string }
+  }[]
 }
 
 interface FilterData {
@@ -89,9 +92,8 @@ export default function SellerCatalogs() {
     price: "",
     categoryId: "",
     materialId: "",
-    sizeId: "",
     colorId: "",
-    stock: ""
+    stockBySizes: {} as Record<string, number> // Nouveau : stocks par taille
   })
   const [newImages, setNewImages] = useState<File[]>([])
   const [imagePreviewUrls, setImagePreviewUrls] = useState<string[]>([])
@@ -195,15 +197,19 @@ export default function SellerCatalogs() {
 
   const handleEditClick = (product: Product) => {
     setSelectedProduct(product)
+    // Récupérer la première taille disponible ou une chaîne vide
+    const firstStock = product.stockBySize?.[0]
     setEditFormData({
       name: product.name,
       description: product.description,
       price: product.price.toString(),
       categoryId: product.category?.id || "",
       materialId: product.material?.id || "",
-      sizeId: product.size?.id || "",
       colorId: product.color?.id || "",
-      stock: product.stockBySize?.[0]?.quantity?.toString() || "0"
+      stockBySizes: product.stockBySize.reduce((acc, stock) => {
+        acc[stock.size.id] = stock.quantity
+        return acc
+      }, {} as Record<string, number>)
     })
     setEditModalOpen(true)
   }
@@ -242,9 +248,12 @@ export default function SellerCatalogs() {
       formData.append('price', editFormData.price)
       formData.append('categoryId', editFormData.categoryId)
       formData.append('materialId', editFormData.materialId)
-      formData.append('sizeId', editFormData.sizeId)
       formData.append('colorId', editFormData.colorId)
-      formData.append('stock', editFormData.stock)
+
+      // Ajouter les stocks par taille
+      Object.entries(editFormData.stockBySizes).forEach(([sizeId, quantity]) => {
+        formData.append('stockBySizes[]', JSON.stringify({ sizeId, quantity }))
+      })
 
       // Ajouter les nouvelles images s'il y en a
       newImages.forEach((image, index) => {
@@ -534,9 +543,9 @@ export default function SellerCatalogs() {
                         {product.material.name}
                       </Badge>
                     )}
-                    {product.size && (
+                    {product.stockBySize && product.stockBySize.length > 0 && (
                       <Badge variant="secondary" className="text-xs">
-                        {product.size.name}
+                        Tailles: {product.stockBySize.map(stock => stock.size.name).join(', ')}
                       </Badge>
                     )}
                     {product.color && (
@@ -672,22 +681,6 @@ export default function SellerCatalogs() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="edit-size">Taille *</Label>
-                <Select value={editFormData.sizeId} onValueChange={(value) => setEditFormData(prev => ({ ...prev, sizeId: value }))}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Sélectionner une taille" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {filterData.sizes.map((size) => (
-                      <SelectItem key={size.id} value={size.id}>
-                        {size.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
                 <Label htmlFor="edit-color">Couleur *</Label>
                 <Select value={editFormData.colorId} onValueChange={(value) => setEditFormData(prev => ({ ...prev, colorId: value }))}>
                   <SelectTrigger>
@@ -704,15 +697,28 @@ export default function SellerCatalogs() {
               </div>
             </div>
 
+            {/* Stock par taille */}
             <div className="space-y-2">
-              <Label htmlFor="edit-stock">Stock</Label>
-              <Input
-                id="edit-stock"
-                type="number"
-                min="0"
-                value={editFormData.stock}
-                onChange={(e) => setEditFormData(prev => ({ ...prev, stock: e.target.value }))}
-              />
+              <Label>Stock par taille *</Label>
+              {filterData.sizes.map((size) => (
+                <div key={size.id} className="flex items-center gap-3">
+                  <span className="text-gray-700 w-24">{size.name}</span>
+                  <Input
+                    type="number"
+                    min="0"
+                    value={editFormData.stockBySizes[size.id] || 0}
+                    onChange={(e) => setEditFormData(prev => ({
+                      ...prev,
+                      stockBySizes: {
+                        ...prev.stockBySizes,
+                        [size.id]: Number(e.target.value)
+                      }
+                    }))}
+                    className="flex-1"
+                    required
+                  />
+                </div>
+              ))}
             </div>
 
             {/* Current Images */}

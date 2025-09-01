@@ -42,6 +42,11 @@ export async function POST(request: NextRequest) {
               include: {
                 user: true
               }
+            },
+            stockBySize: {
+              include: {
+                size: true
+              }
             }
           }
         },

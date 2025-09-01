@@ -7,24 +7,48 @@ export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
 
-    if (!session?.user?.client?.id) {
+    if (!session || session.user.role !== "CLIENT") {
       return NextResponse.json(
         { error: "Non autorisé" },
         { status: 401 }
       )
     }
 
-    const clientId = session.user.client.id
+    // Convertir l'ID utilisateur de string vers number
+    const userId = parseInt(session.user.id)
+    if (isNaN(userId)) {
+      return NextResponse.json(
+        { error: "ID utilisateur invalide" },
+        { status: 400 }
+      )
+    }
+
+    // Récupérer le profil client
+    const client = await prisma.client.findUnique({
+      where: { userId: userId }
+    })
+
+    if (!client) {
+      return NextResponse.json(
+        { error: "Profil client non trouvé" },
+        { status: 404 }
+      )
+    }
 
     // Récupérer les commandes du client avec les détails des produits
     const orders = await prisma.order.findMany({
       where: {
-        clientId: clientId
+        clientId: client.id
       },
       include: {
         product: {
           include: {
-            images: true
+            images: true,
+            seller: {
+              include: {
+                user: true
+              }
+            }
           }
         },
         project: true,
@@ -39,46 +63,15 @@ export async function GET(request: NextRequest) {
       }
     })
 
-    // Grouper les commandes par date pour simuler des "commandes groupées"
-    const groupedOrders = orders.reduce((acc, order) => {
-      const dateKey = order.created_at.toISOString().split('T')[0]
+    return NextResponse.json({
+      success: true,
+      orders: orders
+    })
 
-      if (!acc[dateKey]) {
-        acc[dateKey] = {
-          id: order.id,
-          created_at: order.created_at,
-          status: order.status,
-          items: [],
-          total: 0
-        }
-      }
-
-      acc[dateKey].items.push({
-        id: order.id,
-        quantity: order.quantity,
-        price: Number(order.totalPrice),
-        product: order.product || {
-          id: order.projectId || 0,
-          name: order.project?.title || "Projet sur-mesure",
-          images: []
-        }
-      })
-
-      acc[dateKey].total += Number(order.totalPrice)
-
-      return acc
-    }, {} as any)
-
-    // Convertir en tableau et trier par date
-    const formattedOrders = Object.values(groupedOrders).sort(
-      (a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-    )
-
-    return NextResponse.json(formattedOrders)
   } catch (error) {
     console.error("Erreur lors de la récupération des commandes:", error)
     return NextResponse.json(
-      { error: "Erreur serveur" },
+      { error: "Erreur interne du serveur" },
       { status: 500 }
     )
   }

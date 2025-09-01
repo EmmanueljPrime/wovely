@@ -201,10 +201,13 @@ export default function SellerMyProjects() {
 
       {/* Information importante sur le paiement manuel */}
       <Alert className="mb-6 bg-blue-50 border-blue-200">
-        <Info className="h-4 w-4 text-blue-600" />
         <AlertDescription className="text-blue-800">
           <strong>Information importante :</strong> Pour les projets sur-mesure, les paiements se font directement entre vous et le client.
           Une fois votre proposition acceptée, organisez ensemble le paiement par virement, PayPal ou tout autre moyen qui vous convient.
+          <br /><br />
+          <strong>📦 Détails de livraison :</strong> Wovely sert uniquement de plateforme de mise en relation.
+          Il vous revient de discuter et d'organiser directement avec le client tous les détails concernant la livraison,
+          les délais, le lieu de remise et les modalités de réception du projet fini.
         </AlertDescription>
       </Alert>
 

@@ -77,12 +77,25 @@ export async function PUT(
     const price = parseFloat(formData.get('price') as string)
     const categoryId = formData.get('categoryId') as string
     const materialId = formData.get('materialId') as string
-    const sizeId = formData.get('sizeId') as string
     const colorId = formData.get('colorId') as string
-    const stock = parseInt(formData.get('stock') as string) || 0
+
+    // Récupérer les stocks par taille depuis le nouveau format
+    const stockBySizesData = formData.getAll('stockBySizes[]') as string[]
+    const stockBySizes: { sizeId: string; quantity: number }[] = []
+
+    stockBySizesData.forEach(stockData => {
+      try {
+        const { sizeId, quantity } = JSON.parse(stockData)
+        if (sizeId && quantity >= 0) {
+          stockBySizes.push({ sizeId, quantity })
+        }
+      } catch (error) {
+        console.error('Erreur lors du parsing des stocks:', error)
+      }
+    })
 
     // Validation
-    if (!name || !price || !categoryId || !materialId || !sizeId || !colorId) {
+    if (!name || !price || !categoryId || !materialId || !colorId) {
       return NextResponse.json(
         { error: "Tous les champs obligatoires doivent être remplis" },
         { status: 400 }
@@ -92,6 +105,13 @@ export async function PUT(
     if (price <= 0) {
       return NextResponse.json(
         { error: "Le prix doit être supérieur à 0" },
+        { status: 400 }
+      )
+    }
+
+    if (stockBySizes.length === 0) {
+      return NextResponse.json(
+        { error: "Au moins un stock par taille est requis" },
         { status: 400 }
       )
     }
@@ -138,7 +158,7 @@ export async function PUT(
       }
     }
 
-    // Mettre à jour le produit
+    // Mettre à jour le produit (sans sizeId qui n'existe plus dans le modèle Product)
     const updatedProduct = await prisma.product.update({
       where: { id: productId },
       data: {
@@ -147,7 +167,6 @@ export async function PUT(
         price,
         categoryId,
         materialId,
-        sizeId,
         colorId,
         updated_at: new Date()
       },
@@ -155,8 +174,12 @@ export async function PUT(
         images: true,
         category: true,
         material: true,
-        size: true,
-        color: true
+        color: true,
+        stockBySize: {
+          include: {
+            size: true
+          }
+        }
       }
     })
 
@@ -171,31 +194,24 @@ export async function PUT(
     }
 
     // Mettre à jour le stock
-    if (stock >= 0) {
-      // Chercher d'abord si un stock existe déjà pour ce produit et cette taille
-      const existingStock = await prisma.productStock.findFirst({
+    if (stockBySizes.length > 0) {
+      // Supprimer les anciennes entrées de stock pour ce produit
+      await prisma.productStock.deleteMany({
         where: {
-          productId: productId,
-          sizeId: sizeId
+          productId: productId
         }
       })
 
-      if (existingStock) {
-        // Mettre à jour le stock existant
-        await prisma.productStock.update({
-          where: { id: existingStock.id },
-          data: { quantity: stock }
-        })
-      } else {
-        // Créer un nouveau stock
-        await prisma.productStock.create({
-          data: {
-            productId: productId,
-            sizeId: sizeId,
-            quantity: stock
-          }
-        })
-      }
+      // Créer les nouvelles entrées de stock
+      const stockDataToInsert = stockBySizes.map(stock => ({
+        productId: productId,
+        sizeId: stock.sizeId,
+        quantity: stock.quantity
+      }))
+
+      await prisma.productStock.createMany({
+        data: stockDataToInsert
+      })
     }
 
     return NextResponse.json({
